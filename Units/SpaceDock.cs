@@ -22,7 +22,6 @@ namespace TI4BattleSim.Units
             {
                 capacity = upgraded ? 12 : 6;
             }
-            //todo: faction specific
         }
     }
 }
