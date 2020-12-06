@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace TI4BattleSim.Units
@@ -32,7 +33,15 @@ namespace TI4BattleSim.Units
                                 hits++;
                             if (roll >= 9)
                             {
-                                // todo: detect infantry in space and blow them up
+                                //for now, assume that this ability is only useful defensively, or vs Nekro flaghsip
+                                if (
+                                    target.units.Any(unit => unit.type == UnitType.Infantry) && 
+                                        (target.isActive || 
+                                        target.units.Any(unit => unit.type == UnitType.Flagship) && target.faction == Faction.Nekro))
+                                {
+                                    Unit inf = target.units.First(unit => unit.type == UnitType.Infantry);
+                                    target.units.Remove(inf);
+                                }
                             }
                         }
                         return hits;
