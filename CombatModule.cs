@@ -21,18 +21,22 @@ namespace TI4BattleSim
 
         public int doCombat(Battle battle, Player owner, Player target)
         {
-            return doRoll(battle, owner, target, NumDice, ToHit);
+            // TODO: Pass In Mods somehow
+            return doRoll(battle, owner, target, NumDice, ToHit, 0, 0);
         }
 
-        public Func<Battle, Player, Player, int, int, int> doRoll = defaultRoll;
+        public Func<Battle, Player, Player, int, int, int, int, int> doRoll = defaultRoll;
 
-        public static Func<Battle, Player, Player, int, int, int> noRoll = (battle, owner, target, num, toHit) => 0;
-        public static Func<Battle, Player, Player, int, int, int> defaultRoll = (battle, owner, target, num, toHit) =>
+        public static Func<Battle, Player, Player, int, int, int, int, int> noRoll = 
+            (battle, owner, target, num, toHit, dMod, hMod) => 0;
+
+        public static Func<Battle, Player, Player, int, int, int, int, int> defaultRoll = 
+            (battle, owner, target, num, toHit, dMod, hMod) =>
         {
             int hits = 0;
-            for (int i = 0; i < num; i ++)
+            for (int i = 0; i < num + dMod; i ++)
             {
-                if (battle.random.Next(1,11) >= toHit)
+                if (battle.random.Next(1,11) + hMod >= toHit)
                     hits++;
             }
             return hits;

@@ -11,7 +11,7 @@ namespace TI4BattleSim.Units
             type = UnitType.PDS;
             theater = Theater.Hybrid;
             upgraded = techs != null && techs.upgrades.Contains(type);
-            planetaryShield = true;
+            hasPlanetaryShield = true;
             spaceCannon = new CombatModule(1, upgraded ? 5 : 6);
 
             if (faction == Faction.Titans)
