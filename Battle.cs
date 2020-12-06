@@ -134,6 +134,9 @@ namespace TI4BattleSim
 
         public void SimulateCombatRound(Theater theater)
         {
+            attacker.DoStartOfCombatRound(theater);
+            defender.DoStartOfCombatRound(theater);
+
             int attackerHits = 0;
             int defenderHits = 0;
             if (theater == Theater.Space)
@@ -146,6 +149,7 @@ namespace TI4BattleSim
                 attackerHits = attacker.units.Sum(unit => unit.groundCombat.doCombat(this, attacker, defender));
                 defenderHits = defender.units.Sum(unit => unit.groundCombat.doCombat(this, defender, attacker));
             }
+
             attacker.AssignHits(defenderHits, defender, theater);
             defender.AssignHits(attackerHits, attacker, theater);
         }

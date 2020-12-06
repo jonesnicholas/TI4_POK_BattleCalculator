@@ -26,6 +26,20 @@ namespace TI4BattleSim.Units
             bombard = GetBombardment(faction);
 
             //todo: LOTS faction specific
+            if (faction == Faction.Barony)
+                bypassPlanetaryShield = true;
+            // TODO: Hacan
+            // TODO: Empyrian
+            // TODO: L1
+            // TODO: Mahact
+            // TODO: Mentak
+            // TODO: Naalu
+            // TODO: NRA
+            // TODO: Nekro
+            // TODO: Sardakk
+            // TODO: JolNar
+            // TODO: Winnu
+            // TODO: Yin
         }
 
         private static int GetHitDie(Faction faction, bool upgraded = false)
