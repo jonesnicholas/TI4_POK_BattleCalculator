@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace TI4BattleSim.Units
@@ -27,10 +28,22 @@ namespace TI4BattleSim.Units
                         int hits = 0;
                         for (int i = 0; i < num; i++)
                         {
-                            if (battle.random.Next(1, 11) >= toHit)
+                            int roll = battle.random.Next(1, 11);
+                            if (roll >= toHit)
                                 hits++;
-                        //todo: destroy space-based infantry on 9/10
-                    }
+                            if (roll >= 9)
+                            {
+                                //for now, assume that this ability is only useful defensively, or vs Nekro flaghsip
+                                if (
+                                    target.units.Any(unit => unit.type == UnitType.Infantry) && 
+                                        (target.isActive || 
+                                        target.units.Any(unit => unit.type == UnitType.Flagship) && target.faction == Faction.Nekro))
+                                {
+                                    Unit inf = target.units.First(unit => unit.type == UnitType.Infantry);
+                                    target.units.Remove(inf);
+                                }
+                            }
+                        }
                         return hits;
                     };
                 }

@@ -18,9 +18,6 @@ namespace TI4BattleSim.Units
             {
                 groundCombat = new CombatModule(1, upgraded ? 6 : 7, sustain: true);
             }
-
-
-            //todo: faction specific
         }
     }
 }
