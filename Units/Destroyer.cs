@@ -23,12 +23,12 @@ namespace TI4BattleSim.Units
                 capacity = 1;
                 if (upgraded)
                 {
-                    antiFighter.doRoll = (battle, owner, target, num, toHit) =>
+                    antiFighter.doRoll = (battle, owner, target, num, toHit, dMod, hMod) =>
                     {
                         int hits = 0;
-                        for (int i = 0; i < num; i++)
+                        for (int i = 0; i < num + dMod; i++)
                         {
-                            int roll = battle.random.Next(1, 11);
+                            int roll = battle.random.Next(1, 11) + hMod;
                             if (roll >= toHit)
                                 hits++;
                             if (roll >= 9)

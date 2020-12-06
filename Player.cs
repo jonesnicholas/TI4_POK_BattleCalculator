@@ -53,6 +53,13 @@ namespace TI4BattleSim
             isActive = activePlayer;
         }
 
+        public bool HasFlagship()
+        {
+            if (units == null)
+                return false;
+            return units.Any(unit => unit.type == UnitType.Flagship);
+        }
+
         public int DoAntiFighterBarrage(Battle battle, Player target)
         {
             Unit highRoller = units.OrderBy(unit => unit.antiFighter.ToHit).First();
@@ -65,8 +72,21 @@ namespace TI4BattleSim
             return hits;
         }
 
+        public void DoStartOfCombatRound(Theater theater)
+        {
+            if (faction == Faction.Barony && theater == Theater.Space)
+            {
+                foreach (Unit flagship in units.Where(unit => unit.type == UnitType.Flagship))
+                {
+                    flagship.damage = Damage.None;
+                }
+            }
+        }
+
         public int DoSpaceCannonOffense(Battle battle, Player target)
         {
+            if (target.faction == Faction.Argent && target.HasFlagship())
+                return 0;
             // todo incorporate:
             //  JolNar Commander
             //  plasma scoring
