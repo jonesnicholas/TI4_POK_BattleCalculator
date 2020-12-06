@@ -11,18 +11,12 @@ namespace TI4BattleSim.Units
             type = UnitType.Fighter;
             theater = Theater.Space;
             upgraded = techs != null && techs.upgrades.Contains(type);
-            if (upgraded)
+            spaceCombat = new CombatModule(1, upgraded ? 8 : 9);
+
+            if (faction == Faction.Naalu)
             {
-                spaceCombat = new CombatModule(1, 8);
+                spaceCombat = new CombatModule(1, upgraded ? 7 : 8);
             }
-            else
-            {
-                spaceCombat = new CombatModule(1, 9);
-            }
-
-
-
-            //todo: faction specific
         }
     }
 }

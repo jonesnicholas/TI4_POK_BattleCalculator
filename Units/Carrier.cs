@@ -19,8 +19,6 @@ namespace TI4BattleSim.Units
                 capacity = upgraded ? 8 : 6;
                 spaceCombat.canSustain = upgraded;
             }
-
-            //todo: faction specific
         }
     }
 }

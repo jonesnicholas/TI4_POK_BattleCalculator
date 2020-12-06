@@ -11,22 +11,14 @@ namespace TI4BattleSim.Units
             type = UnitType.Cruiser;
             theater = Theater.Space;
             upgraded = techs != null && techs.upgrades.Contains(type);
-            if (upgraded)
-            {
-                spaceCombat = new CombatModule(1, 6);
-                capacity = 1;
-            }
-            else
-            {
-                spaceCombat = new CombatModule(1, 7);
-            }
+            capacity = upgraded ? 1 : 0;
+            spaceCombat = new CombatModule(1, upgraded ? 6 : 7);
 
             if (faction == Faction.Titans)
             {
                 capacity++;
                 spaceCombat.canSustain = upgraded;
             }
-            //todo: faction specific
         }
     }
 }

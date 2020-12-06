@@ -11,18 +11,12 @@ namespace TI4BattleSim.Units
             type = UnitType.Infantry;
             theater = Theater.Ground;
             upgraded = techs != null && techs.upgrades.Contains(type);
-            if (upgraded)
+            groundCombat = new CombatModule(1, upgraded ? 7 : 8);
+
+            if (faction == Faction.Sol)
             {
-                groundCombat = new CombatModule(1, 7);
+                groundCombat = new CombatModule(1, upgraded ? 6 : 7);
             }
-            else
-            {
-                groundCombat = new CombatModule(1, 8);
-            }
-
-
-
-            //todo: faction specific
         }
     }
 }

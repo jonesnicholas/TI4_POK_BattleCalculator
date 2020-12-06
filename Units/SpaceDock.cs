@@ -13,9 +13,15 @@ namespace TI4BattleSim.Units
             upgraded = techs != null && techs.upgrades.Contains(type);
             capacity = 3;
 
+            if (faction == Faction.Saar)
+            {
+                capacity = upgraded ? 5 : 4;
+            }
 
-
-
+            if (faction == Faction.Cabal)
+            {
+                capacity = upgraded ? 12 : 6;
+            }
             //todo: faction specific
         }
     }

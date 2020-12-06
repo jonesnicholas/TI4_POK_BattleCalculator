@@ -14,9 +14,6 @@ namespace TI4BattleSim.Units
             capacity = 1;
             bombard = new CombatModule(3, 3);
             spaceCombat = new CombatModule(3, 3, sustain: true);
-
-
-            //todo: faction specific
         }
     }
 }
