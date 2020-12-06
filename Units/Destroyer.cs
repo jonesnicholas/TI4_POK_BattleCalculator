@@ -27,10 +27,14 @@ namespace TI4BattleSim.Units
                         int hits = 0;
                         for (int i = 0; i < num; i++)
                         {
-                            if (battle.random.Next(1, 11) >= toHit)
+                            int roll = battle.random.Next(1, 11);
+                            if (roll >= toHit)
                                 hits++;
-                        //todo: destroy space-based infantry on 9/10
-                    }
+                            if (roll >= 9)
+                            {
+                                // todo: detect infantry in space and blow them up
+                            }
+                        }
                         return hits;
                     };
                 }
