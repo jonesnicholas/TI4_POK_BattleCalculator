@@ -83,6 +83,19 @@ namespace TI4BattleSim
             }
         }
 
+        public int DoCombatRolls(Battle battle, Player target, Theater theater)
+        {
+            if (theater == Theater.Space)
+            {
+                return units.Sum(unit => unit.spaceCombat.doCombat(battle, this, target));
+            }
+            if (theater == Theater.Ground)
+            {
+                return units.Sum(unit => unit.groundCombat.doCombat(battle, this, target));
+            }
+            throw new Exception("Tried to roll for combat without correct Theater");
+        }
+
         public int DoSpaceCannonOffense(Battle battle, Player target)
         {
             if (target.faction == Faction.Argent && target.HasFlagship())

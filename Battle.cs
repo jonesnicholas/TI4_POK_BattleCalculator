@@ -137,18 +137,8 @@ namespace TI4BattleSim
             attacker.DoStartOfCombatRound(theater);
             defender.DoStartOfCombatRound(theater);
 
-            int attackerHits = 0;
-            int defenderHits = 0;
-            if (theater == Theater.Space)
-            {
-                attackerHits = attacker.units.Sum(unit => unit.spaceCombat.doCombat(this, attacker, defender));
-                defenderHits = defender.units.Sum(unit => unit.spaceCombat.doCombat(this, defender, attacker));
-            }
-            if (theater == Theater.Ground)
-            {
-                attackerHits = attacker.units.Sum(unit => unit.groundCombat.doCombat(this, attacker, defender));
-                defenderHits = defender.units.Sum(unit => unit.groundCombat.doCombat(this, defender, attacker));
-            }
+            int attackerHits = attacker.DoCombatRolls(this, defender, theater);
+            int defenderHits = defender.DoCombatRolls(this, attacker, theater);
 
             attacker.AssignHits(defenderHits, defender, theater);
             defender.AssignHits(attackerHits, attacker, theater);
