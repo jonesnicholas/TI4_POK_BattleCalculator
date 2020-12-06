@@ -15,8 +15,21 @@ namespace TI4BattleSim.Units
             bombard = new CombatModule(1, 5);
             spaceCombat = new CombatModule(1, 5, sustain: true);
 
+            if (faction == Faction.Sardakk)
+            {
+                bombard = new CombatModule(2, 4);
+                if (upgraded)
+                {
+                    //todo: implement Exotrireme Suicide destroy option
+                }
+            }
 
-            //todo: faction specific
+            if (faction == Faction.L1)
+            {
+                capacity = 2;
+                bombard = new CombatModule(1, upgraded ? 4 : 5);
+                spaceCombat = new CombatModule(1, upgraded ? 4 : 5);
+            }
         }
     }
 }

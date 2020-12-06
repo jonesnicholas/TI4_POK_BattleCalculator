@@ -21,6 +21,7 @@ namespace TI4BattleSim
         public Theater theater;
         public int capacity = 0;
         public bool upgraded = false;
+        public bool planetaryShield = false;
         public Damage damage = Damage.None;
         public CombatModule spaceCombat = CombatModule.NullModule();
         public CombatModule groundCombat = CombatModule.NullModule();

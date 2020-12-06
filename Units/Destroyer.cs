@@ -11,33 +11,29 @@ namespace TI4BattleSim.Units
             type = UnitType.Destroyer;
             theater = Theater.Space;
             upgraded = techs != null && techs.upgrades.Contains(type);
-            if (upgraded)
-            {
-                spaceCombat = new CombatModule(1, 8);
-                antiFighter = new CombatModule(3, 6);
-            }
-            else
-            {
-                spaceCombat = new CombatModule(1, 9);
-                antiFighter = new CombatModule(2, 9);
-            }
+            antiFighter = new CombatModule(
+                upgraded ? 3 : 2,
+                upgraded ? 6 : 9);
+            spaceCombat = new CombatModule(1, upgraded ? 8 : 9);
 
-            //todo: faction specific
-            if (faction == Faction.Argent && upgraded)
+            if (faction == Faction.Argent)
             {
                 spaceCombat = new CombatModule(1, upgraded ? 7 : 8);
                 capacity = 1;
-                antiFighter.doRoll = (battle, owner, target, num, toHit) =>
+                if (upgraded)
                 {
-                    int hits = 0;
-                    for (int i = 0; i < num; i++)
+                    antiFighter.doRoll = (battle, owner, target, num, toHit) =>
                     {
-                        if (battle.random.Next(1, 11) >= toHit)
-                            hits++;
+                        int hits = 0;
+                        for (int i = 0; i < num; i++)
+                        {
+                            if (battle.random.Next(1, 11) >= toHit)
+                                hits++;
                         //todo: destroy space-based infantry on 9/10
                     }
-                    return hits;
-                };
+                        return hits;
+                    };
+                }
             }
         }
     }

@@ -109,6 +109,7 @@ namespace TI4BattleSim
                 return;
             }
             //todo: handle graviton
+            //todo: properly handle Titan PDS in ground combats
 
             //todo: find way to intelligently 'switch in' different hit assigning philosophies.
             // first, assign to safe sustains
