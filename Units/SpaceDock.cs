@@ -16,6 +16,7 @@ namespace TI4BattleSim.Units
             if (faction == Faction.Saar)
             {
                 capacity = upgraded ? 5 : 4;
+                theater = Theater.Space;
             }
 
             if (faction == Faction.Cabal)

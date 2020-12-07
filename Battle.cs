@@ -127,7 +127,17 @@ namespace TI4BattleSim
                 SimulateCombatRound(Theater.Ground);
                 EvaluateWinner(Theater.Ground);
             }
+            EndOfGroundCombat();
             return winner;
+        }
+
+        private void EndOfGroundCombat()
+        {
+            Player victor = winner == Winner.Attacker ? attacker : defender;
+            if (victor.HasTech(Tech.Daaxive))
+            {
+                victor.AddUnit(UnitType.Infantry);
+            }
         }
 
         private void CommitGroundForces()

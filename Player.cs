@@ -125,32 +125,44 @@ namespace TI4BattleSim
                 return 0;
             // todo incorporate:
             //  JolNar Commander
-            //  plasma scoring
-            //  anti-mass
             Unit highRoller = units.OrderBy(unit => unit.spaceCannon.ToHit).First();
+
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
+            if (HasTech(Tech.PlasmaScoring))
+                mod++;
+
             highRoller.spaceCannon.NumDice += mod;
-            int hits = units.Sum(unit => unit.spaceCannon.doCombat(battle, this, target));
+
+            int hMod = target.HasTech(Tech.Antimass) ? -1 : 0;
+
+            int hits = units.Sum(unit => unit.spaceCannon.doCombat(battle, this, target, hitMod:hMod));
             highRoller.spaceCannon.NumDice -= mod;
             return hits;
         }
 
         internal int DoSpaceCannonDefense(Battle battle, Player target)
         {
+            if (target.HasTech(Tech.L4Disruptors))
+                return 0;
+
             // todo incorporate:
             //  JolNar Commander
-            //  plasma scoring
-            //  anti-mass
             Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderBy(unit => unit.spaceCannon.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
+            if (HasTech(Tech.PlasmaScoring))
+                mod++;
+
             highRoller.spaceCannon.NumDice += mod;
+
+            int hMod = target.HasTech(Tech.Antimass) ? -1 : 0;
+
             int hits = 
                 units.Where(unit => unit.theater != Theater.Space)
-                .Sum(unit => unit.spaceCannon.doCombat(battle, this, target));
+                .Sum(unit => unit.spaceCannon.doCombat(battle, this, target, hitMod:hMod));
             highRoller.spaceCannon.NumDice -= mod;
             return hits;
         }
@@ -161,13 +173,14 @@ namespace TI4BattleSim
                 return 0;
             // todo incorporate:
             //  JolNar Commander
-            //  plasma scoring
-            //  planetary shield + bypasses
             // x89?
             Unit highRoller = units.OrderBy(unit => unit.bombard.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
+            if (HasTech(Tech.PlasmaScoring))
+                mod++;
+
             highRoller.bombard.NumDice += mod;
             int hits = units.Sum(unit => unit.bombard.doCombat(battle, this, target));
             highRoller.bombard.NumDice -= mod;
@@ -225,6 +238,7 @@ namespace TI4BattleSim
                 {
                     //todo: implement intelligent targeting
                     Unit target = targets.First();
+                    // intentionally *not* calling the sustainDamage method, as this doesn't create sustain damage triggers
                     target.damage = Damage.Damaged;
                     targets.Remove(target);
                     hits--;
@@ -268,13 +282,14 @@ namespace TI4BattleSim
             //todo: add Nomad and NaazRokha Mechs to space
             //todo: support barony double-sustain
             //todo: intelligently sort and eliminate low-priority targets first
-            int i = 0;
-            while (i<targets.Count && i<hits)
-            {// todo: consider popping off items instead of indexing
-                targets[i].SustainDamage();
-                i++;
+            while (targets.Count > 0 && hits > 0)
+            {
+                Unit target = targets.First();
+                target.SustainDamage();
+                hits -= (HasTech(Tech.NES) ? 2 : 1);
             }
-            return hits - i;
+
+            return hits;
         }
 
         void AssignDestroys(Battle battle, int hits, Player source, Theater theater)
@@ -307,7 +322,7 @@ namespace TI4BattleSim
                 {
                     // sustain and sort target list again (priority queue will make this better)
                     lowPri.SustainDamage();
-                    hits--; //todo: Barony nonsense
+                    hits -= (HasTech(Tech.NES) ? 2 : 1);
                     targets.Sort(Unit.SortCombat(theater));
                 }
                 else
@@ -317,6 +332,16 @@ namespace TI4BattleSim
                     hits--;
                 }
             }
+        }
+
+        public bool HasTech(Tech tech)
+        {
+            return techs.HasTech(tech);
+        }
+
+        public void AddUnit(UnitType type)
+        {
+            units.Add(Unit.CreateUnit(type, techs, faction));
         }
 
         public static List<Faction> GetAllFactions()
