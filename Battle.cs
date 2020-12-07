@@ -90,13 +90,13 @@ namespace TI4BattleSim
             //todo: fully implement graviton
             int ApdsHits = attacker.DoSpaceCannonOffense(this, defender);
             int DpdsHits = defender.DoSpaceCannonOffense(this, attacker);
-            attacker.AssignHits(DpdsHits, defender, Theater.Space);
-            defender.AssignHits(ApdsHits, attacker, Theater.Space);
+            attacker.AssignHits(this, DpdsHits, defender, Theater.Space);
+            defender.AssignHits(this, ApdsHits, attacker, Theater.Space);
 
             foreach (Player player in others)
             {
                 int otherHits = player.DoSpaceCannonOffense(this, attacker);
-                attacker.AssignHits(otherHits, player, Theater.Space);
+                attacker.AssignHits(this, otherHits, player, Theater.Space);
             }
         }
 
@@ -107,8 +107,8 @@ namespace TI4BattleSim
             int AafbHits = attacker.DoAntiFighterBarrage(this, defender);
             int DafbHits = defender.DoAntiFighterBarrage(this, attacker);
 
-            attacker.AssignHits(DafbHits, defender, Theater.Space, HitType.AFB);
-            defender.AssignHits(AafbHits, attacker, Theater.Space, HitType.AFB);
+            attacker.AssignHits(this, DafbHits, defender, Theater.Space, HitType.AFB);
+            defender.AssignHits(this, AafbHits, attacker, Theater.Space, HitType.AFB);
         }
 
         public Winner SimulateGroundCombat()
@@ -132,14 +132,14 @@ namespace TI4BattleSim
         private void SpaceCannonDefense()
         {
             int spaceCannonHits = defender.DoSpaceCannonDefense(this, attacker);
-            attacker.AssignHits(spaceCannonHits, defender, Theater.Ground);
+            attacker.AssignHits(this, spaceCannonHits, defender, Theater.Ground);
         }
 
         private void Bombardment()
         {
             int bombardHits = attacker.DoBombardment(this, defender);
             //todo: implement X89
-            defender.AssignHits(bombardHits, attacker, Theater.Ground);
+            defender.AssignHits(this, bombardHits, attacker, Theater.Ground);
         }
 
         public void SimulateCombatRound(Theater theater)
@@ -150,8 +150,8 @@ namespace TI4BattleSim
             int attackerHits = attacker.DoCombatRolls(this, defender, theater);
             int defenderHits = defender.DoCombatRolls(this, attacker, theater);
 
-            attacker.AssignHits(defenderHits, defender, theater);
-            defender.AssignHits(attackerHits, attacker, theater);
+            attacker.AssignHits(this, defenderHits, defender, theater);
+            defender.AssignHits(this, attackerHits, attacker, theater);
         }
 
         public void EvaluateWinner(Theater theater)

@@ -72,7 +72,6 @@ namespace TI4BattleSim.Units
             // TODO: Empyrian
             // TODO: L1
             // TODO: Mahact
-            // TODO: Mentak
             // TODO: Naalu
             // TODO: NRA
             // TODO: Nekro
