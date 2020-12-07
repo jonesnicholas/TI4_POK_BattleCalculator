@@ -211,6 +211,11 @@ namespace TI4BattleSim
 
         int AssignToSustains(int hits, Player source, Theater theater, bool safe = false)
         {
+            if (theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship())
+            {
+                return hits;
+            }
+
             List<Unit> targets = new List<Unit>();
             if (theater == Theater.Space)
             {
@@ -266,11 +271,14 @@ namespace TI4BattleSim
             //todo: implement intelligent capacity saving in space battles
             //todo: consider implementing priority queue
             targets.Sort(Unit.SortCombat(theater));
-            
+            bool mentak = theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship();
+                //todo: also mentak mechs
+
+
             while (hits > 0 && targets.Count > 0)
             {
                 Unit lowPri = targets.First();
-                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None)
+                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None && !mentak)
                 {
                     // sustain and sort target list again (priority queue will make this better)
                     lowPri.SustainDamage();
