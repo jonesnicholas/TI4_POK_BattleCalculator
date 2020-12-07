@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace TI4BattleSim.Units
@@ -30,6 +31,23 @@ namespace TI4BattleSim.Units
             //todo: LOTS faction specific
             if (faction == Faction.Barony)
                 bypassPlanetaryShield = true;
+
+            if (faction == Faction.Winnu)
+            {
+                spaceCombat.doRoll = (battle, owner, target, num, toHit, dMod, hMod) =>
+                {
+                    int hits = 0;
+                    int enemyNFShips = target.units.Count(unit => unit.ParticipatesInCombat(Theater.Space) && unit.type != UnitType.Fighter);
+                    for (int i = 0; i < enemyNFShips; i++)
+                    {
+                        if (battle.random.Next(1, 11) + hMod >= toHit)
+                            hits++;
+                    }
+                    return hits;
+                };
+            }
+
+
             //      Both Empyrian and Hacan need to add 'limit' option
             // TODO: Hacan
             // TODO: Empyrian
