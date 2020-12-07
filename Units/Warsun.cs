@@ -11,7 +11,8 @@ namespace TI4BattleSim.Units
             type = UnitType.Warsun;
             theater = Theater.Space;
             upgraded = techs != null && techs.upgrades.Contains(type);
-            capacity = 1;
+            capacity = 6;
+            bypassPlanetaryShield = true;
             bombard = new CombatModule(3, 3);
             spaceCombat = new CombatModule(3, 3, sustain: true);
         }

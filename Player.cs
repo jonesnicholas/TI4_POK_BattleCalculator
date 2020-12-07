@@ -18,7 +18,7 @@ namespace TI4BattleSim
 
     public enum HitType
     {
-        Generic, Graviton, AFB
+        Generic, Graviton, AFB, X89
     };
 
     public class Player
@@ -114,8 +114,28 @@ namespace TI4BattleSim
             return hits;
         }
 
+        internal int DoSpaceCannonDefense(Battle battle, Player target)
+        {
+            // todo incorporate:
+            //  JolNar Commander
+            //  plasma scoring
+            //  anti-mass
+            Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderBy(unit => unit.spaceCannon.ToHit).First();
+            int mod = 0;
+            if (commanders.Contains(Faction.Argent))
+                mod++;
+            highRoller.spaceCannon.NumDice += mod;
+            int hits = 
+                units.Where(unit => unit.theater != Theater.Space)
+                .Sum(unit => unit.spaceCannon.doCombat(battle, this, target));
+            highRoller.spaceCannon.NumDice -= mod;
+            return hits;
+        }
+
         public int DoBombardment(Battle battle, Player target)
         {
+            if (target.units.Any(unit => unit.hasPlanetaryShield) && !target.units.Any(unit => unit.bypassPlanetaryShield))
+                return 0;
             // todo incorporate:
             //  JolNar Commander
             //  plasma scoring
