@@ -85,15 +85,38 @@ namespace TI4BattleSim
 
         public int DoCombatRolls(Battle battle, Player target, Theater theater)
         {
+            //todo: try to make NRA flagship cleaner
+            if (faction == Faction.NRA && HasFlagship())
+            {
+                foreach (Unit mech in units.Where(unit => unit.type == UnitType.Mech))
+                {
+                    mech.spaceCombat.NumDice++;
+                    mech.groundCombat.NumDice++;
+                }
+            }
+
+            int hits = 0;
             if (theater == Theater.Space)
             {
-                return units.Sum(unit => unit.spaceCombat.doCombat(battle, this, target));
+                hits =  units.Sum(unit => unit.spaceCombat.doCombat(battle, this, target));
             }
             if (theater == Theater.Ground)
             {
-                return units.Sum(unit => unit.groundCombat.doCombat(battle, this, target));
+                hits =  units.Sum(unit => unit.groundCombat.doCombat(battle, this, target));
             }
-            throw new Exception("Tried to roll for combat without correct Theater");
+            if (theater == Theater.Hybrid)
+                throw new Exception("Tried to roll for combat without correct Theater");
+
+            if (faction == Faction.NRA && HasFlagship())
+            {
+                foreach (Unit mech in units.Where(unit => unit.type == UnitType.Mech))
+                {
+                    mech.spaceCombat.NumDice--;
+                    mech.groundCombat.NumDice--;
+                }
+            }
+
+            return hits;
         }
 
         public int DoSpaceCannonOffense(Battle battle, Player target)
