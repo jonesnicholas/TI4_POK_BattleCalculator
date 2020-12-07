@@ -170,7 +170,7 @@ namespace TI4BattleSim
             // then, if risking direct hit, assign to unsafe sustains
             hits = AssignToSustains(hits, source, theater);
             // then, assign to ships that might blow up
-            AssignDestroys(hits, source, theater);
+            AssignDestroys(battle, hits, source, theater);
         }
 
         void AssignAFBHits(Battle battle, int hits, Player source)
@@ -262,6 +262,8 @@ namespace TI4BattleSim
             // for now, sort by 'combat rating', and lose
             // fighters < destroyer < cruiser < dreads <= flagship < warsun
             // with carriers opportunistically lost when their capacity is "No longer needed"
+
+            // todo: make sure to keep one boot when attacking w/ Naalu flagship
 
             List<Unit> targets = units.Where(unit =>
                 unit.ParticipatesInCombat(theater)

@@ -116,6 +116,7 @@ namespace TI4BattleSim
             winner = Winner.None;
             //bombard
             Bombardment();
+            CommitGroundForces();
             //pds
             SpaceCannonDefense();
 
@@ -127,6 +128,17 @@ namespace TI4BattleSim
                 EvaluateWinner(Theater.Ground);
             }
             return winner;
+        }
+
+        private void CommitGroundForces()
+        {
+            if (attacker.faction == Faction.Naalu && attacker.HasFlagship())
+            {
+                foreach (Unit unit in attacker.units.Where(unit => unit.type == UnitType.Fighter))
+                {
+                    unit.groundCombat = unit.spaceCombat;
+                }
+            }
         }
 
         private void SpaceCannonDefense()
@@ -167,8 +179,15 @@ namespace TI4BattleSim
                 winner = Winner.Defender;
             if (!attackerAlive && !defenderAlive)
                 winner = Winner.Draw;
+
             if (winner == Winner.Draw && theater == Theater.Ground)
-                winner = Winner.Defender; //todo: properly handle Naalu Flagship case.
+                winner = Winner.Defender; 
+
+            if (winner == Winner.Attacker && attacker.faction == Faction.Naalu && attacker.HasFlagship() &&
+                !attacker.units.Any(unit => unit.type == UnitType.Infantry || unit.type == UnitType.Mech))
+            {
+                winner = Winner.Defender; //if Naalu can't get boots on the ground, they don't technically win
+            }
         }
     }
 }
