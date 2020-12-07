@@ -95,6 +95,11 @@ namespace TI4BattleSim
             damage = Damage.RecentlyDamaged;
         }
 
+        public virtual void DestroyUnit(Battle battle, Player owner)
+        {
+            owner.units.Remove(this);
+        }
+
         public bool ParticipatesInCombat(Theater theater)
         {
             return

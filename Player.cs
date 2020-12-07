@@ -151,14 +151,14 @@ namespace TI4BattleSim
             return hits;
         }
 
-        public void AssignHits(int hits, Player source, Theater theater, HitType hitType = HitType.Generic)
+        public void AssignHits(Battle battle, int hits, Player source, Theater theater, HitType hitType = HitType.Generic)
         {
             if (hits <= 0)
                 return;
 
             if (hitType == HitType.AFB)
             {
-                AssignAFBHits(hits, source);
+                AssignAFBHits(battle, hits, source);
                 return;
             }
             //todo: handle graviton
@@ -173,7 +173,7 @@ namespace TI4BattleSim
             AssignDestroys(hits, source, theater);
         }
 
-        void AssignAFBHits(int hits, Player source)
+        void AssignAFBHits(Battle battle, int hits, Player source)
         {
             if (hits <= 0)
                 return;
@@ -182,9 +182,11 @@ namespace TI4BattleSim
             {
                 Unit fighter = fighters.First();
                 fighters.Remove(fighter);
+                fighter.DestroyUnit(battle, this);
                 units.Remove(fighter);
                 hits--;
             }
+
             //leftover hits wasted unless source is Argent Flight
             if (source.faction == Faction.Argent)
             {
@@ -247,7 +249,7 @@ namespace TI4BattleSim
             return hits - i;
         }
 
-        void AssignDestroys(int hits, Player source, Theater theater)
+        void AssignDestroys(Battle battle, int hits, Player source, Theater theater)
         {
             // Note, if we reach here, we assume that we've already sustain damage on everything we safely can, 
             // and therefore assign hits assuming we are going to start losing things
@@ -278,7 +280,7 @@ namespace TI4BattleSim
                 else
                 {
                     targets.Remove(lowPri); //(priority queue will make this better too)
-                    units.Remove(lowPri);
+                    lowPri.DestroyUnit(battle, this);
                     hits--;
                 }
             }

@@ -6,8 +6,10 @@ namespace TI4BattleSim.Units
 {
     public class Flagship : Unit
     {
-        public Flagship(TechModel techs, Faction faction = Faction.None)
+        Faction faction;
+        public Flagship(TechModel techs, Faction fct = Faction.None)
         {
+            faction = fct;
             if (faction == Faction.None)
             {
                 throw new Exception("Generic faction cannot use flagships");
@@ -28,6 +30,7 @@ namespace TI4BattleSim.Units
             //todo: LOTS faction specific
             if (faction == Faction.Barony)
                 bypassPlanetaryShield = true;
+            //      Both Empyrian and Hacan need to add 'limit' option
             // TODO: Hacan
             // TODO: Empyrian
             // TODO: L1
@@ -39,7 +42,24 @@ namespace TI4BattleSim.Units
             // TODO: Sardakk
             // TODO: JolNar
             // TODO: Winnu
-            // TODO: Yin
+        }
+
+        public override void DestroyUnit(Battle battle, Player owner)
+        {
+            base.DestroyUnit(battle, owner);
+            if (faction == Faction.Yin)
+            {
+                //Kaboom!
+                foreach (Unit unit in battle.attacker.units)
+                {
+                    unit.DestroyUnit(battle, battle.attacker);
+                }
+
+                foreach (Unit unit in battle.defender.units)
+                {
+                    unit.DestroyUnit(battle, battle.attacker);
+                }
+            }
         }
 
         private static int GetHitDie(Faction faction, bool upgraded = false)
