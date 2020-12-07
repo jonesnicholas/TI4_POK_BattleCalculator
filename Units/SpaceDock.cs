@@ -9,7 +9,7 @@ namespace TI4BattleSim.Units
         public SpaceDock(TechModel techs, Faction faction = Faction.None)
         {
             type = UnitType.SpaceDock;
-            theater = Theater.Hybrid;
+            theater = Theater.Ground;
             upgraded = techs != null && techs.upgrades.Contains(type);
             capacity = 3;
 

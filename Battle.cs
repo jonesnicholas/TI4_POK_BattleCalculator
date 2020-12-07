@@ -74,9 +74,6 @@ namespace TI4BattleSim
             AntiFighterBarrage();
 
             EvaluateWinner(Theater.Space);
-            if (winner != Winner.None)
-                return winner;
-            //crs
 
             while (winner == Winner.None)
             {
@@ -91,7 +88,6 @@ namespace TI4BattleSim
         {
             //pds
             //todo: fully implement graviton
-            //todo: verify that xxcha & argent flagships, and xxcha mech are correctly included
             int ApdsHits = attacker.DoSpaceCannonOffense(this, defender);
             int DpdsHits = defender.DoSpaceCannonOffense(this, attacker);
             attacker.AssignHits(DpdsHits, defender, Theater.Space);
@@ -119,10 +115,11 @@ namespace TI4BattleSim
         {
             winner = Winner.None;
             //bombard
+            Bombardment();
             //pds
+            SpaceCannonDefense();
+
             EvaluateWinner(Theater.Ground);
-            if (winner != Winner.None)
-                return winner;
             //gcr
             while (winner == Winner.None)
             {
@@ -132,23 +129,26 @@ namespace TI4BattleSim
             return winner;
         }
 
+        private void SpaceCannonDefense()
+        {
+            int spaceCannonHits = defender.DoSpaceCannonDefense(this, attacker);
+            attacker.AssignHits(spaceCannonHits, defender, Theater.Ground);
+        }
+
+        private void Bombardment()
+        {
+            int bombardHits = attacker.DoBombardment(this, defender);
+            //todo: implement X89
+            defender.AssignHits(bombardHits, attacker, Theater.Ground);
+        }
+
         public void SimulateCombatRound(Theater theater)
         {
             attacker.DoStartOfCombatRound(theater);
             defender.DoStartOfCombatRound(theater);
 
-            int attackerHits = 0;
-            int defenderHits = 0;
-            if (theater == Theater.Space)
-            {
-                attackerHits = attacker.units.Sum(unit => unit.spaceCombat.doCombat(this, attacker, defender));
-                defenderHits = defender.units.Sum(unit => unit.spaceCombat.doCombat(this, defender, attacker));
-            }
-            if (theater == Theater.Ground)
-            {
-                attackerHits = attacker.units.Sum(unit => unit.groundCombat.doCombat(this, attacker, defender));
-                defenderHits = defender.units.Sum(unit => unit.groundCombat.doCombat(this, defender, attacker));
-            }
+            int attackerHits = attacker.DoCombatRolls(this, defender, theater);
+            int defenderHits = defender.DoCombatRolls(this, attacker, theater);
 
             attacker.AssignHits(defenderHits, defender, theater);
             defender.AssignHits(attackerHits, attacker, theater);
