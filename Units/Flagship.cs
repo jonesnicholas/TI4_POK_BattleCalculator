@@ -11,10 +11,6 @@ namespace TI4BattleSim.Units
         public Flagship(TechModel techs, Faction fct = Faction.None)
         {
             faction = fct;
-            if (faction == Faction.None)
-            {
-                throw new Exception("Generic faction cannot use flagships");
-            }
             type = UnitType.Flagship;
             theater = Theater.Space;
             upgraded = techs != null && techs.upgrades.Contains(type);
@@ -108,6 +104,7 @@ namespace TI4BattleSim.Units
                 case Faction.Mahact:
                 case Faction.Cabal:
                 case Faction.Yssaril:
+                case Faction.None:
                     return 5;
                 case Faction.Sardakk:
                 case Faction.Jolnar:
@@ -143,6 +140,7 @@ namespace TI4BattleSim.Units
                 case Faction.Muaat:
                 case Faction.Empyrean:
                 case Faction.Ghosts:
+                case Faction.Hacan:
                 case Faction.Mahact:
                 case Faction.Mentak:
                 case Faction.Sardakk:
@@ -153,6 +151,7 @@ namespace TI4BattleSim.Units
                 case Faction.Xxcha:
                 case Faction.Yin:
                 case Faction.Yssaril:
+                case Faction.None:
                     return 3;
                 case Faction.NRA:
                     return 4;
@@ -200,6 +199,7 @@ namespace TI4BattleSim.Units
                 case Faction.Nomad:
                 case Faction.Titans:
                 case Faction.Cabal:
+                case Faction.None:
                     return CombatModule.NullModule();
                 default:
                     throw new Exception($"Faction {faction} flagship has undefined SpaceCannon");
@@ -239,6 +239,7 @@ namespace TI4BattleSim.Units
                 case Faction.Xxcha:
                 case Faction.Yin:
                 case Faction.Yssaril:
+                case Faction.None:
                     return CombatModule.NullModule();
                 default:
                     throw new Exception($"Faction {faction} flagship has undefined AFB");
@@ -275,6 +276,7 @@ namespace TI4BattleSim.Units
                 case Faction.NRA:
                 case Faction.Nomad:
                 case Faction.Titans:
+                case Faction.None:
                     return CombatModule.NullModule();
                 default:
                     throw new Exception($"Faction {faction} flagship has undefined Bombard");
