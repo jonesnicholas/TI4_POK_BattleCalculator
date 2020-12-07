@@ -85,15 +85,38 @@ namespace TI4BattleSim
 
         public int DoCombatRolls(Battle battle, Player target, Theater theater)
         {
+            //todo: try to make NRA flagship cleaner
+            if (faction == Faction.NRA && HasFlagship())
+            {
+                foreach (Unit mech in units.Where(unit => unit.type == UnitType.Mech))
+                {
+                    mech.spaceCombat.NumDice++;
+                    mech.groundCombat.NumDice++;
+                }
+            }
+
+            int hits = 0;
             if (theater == Theater.Space)
             {
-                return units.Sum(unit => unit.spaceCombat.doCombat(battle, this, target));
+                hits =  units.Sum(unit => unit.spaceCombat.doCombat(battle, this, target));
             }
             if (theater == Theater.Ground)
             {
-                return units.Sum(unit => unit.groundCombat.doCombat(battle, this, target));
+                hits =  units.Sum(unit => unit.groundCombat.doCombat(battle, this, target));
             }
-            throw new Exception("Tried to roll for combat without correct Theater");
+            if (theater == Theater.Hybrid)
+                throw new Exception("Tried to roll for combat without correct Theater");
+
+            if (faction == Faction.NRA && HasFlagship())
+            {
+                foreach (Unit mech in units.Where(unit => unit.type == UnitType.Mech))
+                {
+                    mech.spaceCombat.NumDice--;
+                    mech.groundCombat.NumDice--;
+                }
+            }
+
+            return hits;
         }
 
         public int DoSpaceCannonOffense(Battle battle, Player target)
@@ -151,14 +174,14 @@ namespace TI4BattleSim
             return hits;
         }
 
-        public void AssignHits(int hits, Player source, Theater theater, HitType hitType = HitType.Generic)
+        public void AssignHits(Battle battle, int hits, Player source, Theater theater, HitType hitType = HitType.Generic)
         {
             if (hits <= 0)
                 return;
 
             if (hitType == HitType.AFB)
             {
-                AssignAFBHits(hits, source);
+                AssignAFBHits(battle, hits, source);
                 return;
             }
             //todo: handle graviton
@@ -170,10 +193,10 @@ namespace TI4BattleSim
             // then, if risking direct hit, assign to unsafe sustains
             hits = AssignToSustains(hits, source, theater);
             // then, assign to ships that might blow up
-            AssignDestroys(hits, source, theater);
+            AssignDestroys(battle, hits, source, theater);
         }
 
-        void AssignAFBHits(int hits, Player source)
+        void AssignAFBHits(Battle battle, int hits, Player source)
         {
             if (hits <= 0)
                 return;
@@ -182,9 +205,11 @@ namespace TI4BattleSim
             {
                 Unit fighter = fighters.First();
                 fighters.Remove(fighter);
+                fighter.DestroyUnit(battle, this);
                 units.Remove(fighter);
                 hits--;
             }
+
             //leftover hits wasted unless source is Argent Flight
             if (source.faction == Faction.Argent)
             {
@@ -209,6 +234,11 @@ namespace TI4BattleSim
 
         int AssignToSustains(int hits, Player source, Theater theater, bool safe = false)
         {
+            if (theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship())
+            {
+                return hits;
+            }
+
             List<Unit> targets = new List<Unit>();
             if (theater == Theater.Space)
             {
@@ -247,7 +277,7 @@ namespace TI4BattleSim
             return hits - i;
         }
 
-        void AssignDestroys(int hits, Player source, Theater theater)
+        void AssignDestroys(Battle battle, int hits, Player source, Theater theater)
         {
             // Note, if we reach here, we assume that we've already sustain damage on everything we safely can, 
             // and therefore assign hits assuming we are going to start losing things
@@ -255,6 +285,8 @@ namespace TI4BattleSim
             // for now, sort by 'combat rating', and lose
             // fighters < destroyer < cruiser < dreads <= flagship < warsun
             // with carriers opportunistically lost when their capacity is "No longer needed"
+
+            // todo: make sure to keep one boot when attacking w/ Naalu flagship
 
             List<Unit> targets = units.Where(unit =>
                 unit.ParticipatesInCombat(theater)
@@ -264,11 +296,14 @@ namespace TI4BattleSim
             //todo: implement intelligent capacity saving in space battles
             //todo: consider implementing priority queue
             targets.Sort(Unit.SortCombat(theater));
-            
+            bool mentak = theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship();
+                //todo: also mentak mechs
+
+
             while (hits > 0 && targets.Count > 0)
             {
                 Unit lowPri = targets.First();
-                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None)
+                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None && !mentak)
                 {
                     // sustain and sort target list again (priority queue will make this better)
                     lowPri.SustainDamage();
@@ -278,7 +313,7 @@ namespace TI4BattleSim
                 else
                 {
                     targets.Remove(lowPri); //(priority queue will make this better too)
-                    units.Remove(lowPri);
+                    lowPri.DestroyUnit(battle, this);
                     hits--;
                 }
             }

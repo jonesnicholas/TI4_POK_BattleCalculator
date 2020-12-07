@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace TI4BattleSim.Units
 {
     public class Flagship : Unit
     {
-        public Flagship(TechModel techs, Faction faction = Faction.None)
+        Faction faction;
+        public Flagship(TechModel techs, Faction fct = Faction.None)
         {
-            if (faction == Faction.None)
-            {
-                throw new Exception("Generic faction cannot use flagships");
-            }
+            faction = fct;
             type = UnitType.Flagship;
             theater = Theater.Space;
             upgraded = techs != null && techs.upgrades.Contains(type);
@@ -28,18 +27,67 @@ namespace TI4BattleSim.Units
             //todo: LOTS faction specific
             if (faction == Faction.Barony)
                 bypassPlanetaryShield = true;
+
+            if (faction == Faction.Winnu)
+            {
+                spaceCombat.doRoll = (battle, owner, target, num, toHit, dMod, hMod) =>
+                {
+                    int hits = 0;
+                    int enemyNFShips = target.units.Count(unit => unit.ParticipatesInCombat(Theater.Space) && unit.type != UnitType.Fighter);
+                    for (int i = 0; i < enemyNFShips; i++)
+                    {
+                        if (battle.random.Next(1, 11) + hMod >= toHit)
+                            hits++;
+                    }
+                    return hits;
+                };
+            }
+
+            if (faction == Faction.Jolnar)
+            {
+                spaceCombat.doRoll = (battle, owner, target, num, toHit, dMod, hMod) =>
+                {
+                    int hits = 0;
+                    for (int i = 0; i < num + dMod; i++)
+                    {
+                        int roll = battle.random.Next(1, 11);
+                        if (roll + hMod >= toHit)
+                            hits++;
+                        if (roll >= 9)
+                        {
+                            hits += 2;
+                        }
+                    }
+                    return hits;
+                };
+            }
+
+
+            //      Both Empyrian and Hacan need to add 'limit' option
             // TODO: Hacan
             // TODO: Empyrian
             // TODO: L1
             // TODO: Mahact
-            // TODO: Mentak
-            // TODO: Naalu
-            // TODO: NRA
             // TODO: Nekro
             // TODO: Sardakk
-            // TODO: JolNar
-            // TODO: Winnu
-            // TODO: Yin
+        }
+
+        public override void DestroyUnit(Battle battle, Player owner)
+        {
+            base.DestroyUnit(battle, owner);
+            if (faction == Faction.Yin)
+            {
+                //Kaboom!
+                foreach (Unit unit in battle.attacker.units)
+                {
+                    unit.DestroyUnit(battle, battle.attacker);
+                }
+
+                foreach (Unit unit in battle.defender.units)
+                {
+                    unit.DestroyUnit(battle, battle.attacker);
+                }
+            }
         }
 
         private static int GetHitDie(Faction faction, bool upgraded = false)
@@ -56,6 +104,7 @@ namespace TI4BattleSim.Units
                 case Faction.Mahact:
                 case Faction.Cabal:
                 case Faction.Yssaril:
+                case Faction.None:
                     return 5;
                 case Faction.Sardakk:
                 case Faction.Jolnar:
@@ -91,6 +140,7 @@ namespace TI4BattleSim.Units
                 case Faction.Muaat:
                 case Faction.Empyrean:
                 case Faction.Ghosts:
+                case Faction.Hacan:
                 case Faction.Mahact:
                 case Faction.Mentak:
                 case Faction.Sardakk:
@@ -101,6 +151,7 @@ namespace TI4BattleSim.Units
                 case Faction.Xxcha:
                 case Faction.Yin:
                 case Faction.Yssaril:
+                case Faction.None:
                     return 3;
                 case Faction.NRA:
                     return 4;
@@ -148,6 +199,7 @@ namespace TI4BattleSim.Units
                 case Faction.Nomad:
                 case Faction.Titans:
                 case Faction.Cabal:
+                case Faction.None:
                     return CombatModule.NullModule();
                 default:
                     throw new Exception($"Faction {faction} flagship has undefined SpaceCannon");
@@ -187,6 +239,7 @@ namespace TI4BattleSim.Units
                 case Faction.Xxcha:
                 case Faction.Yin:
                 case Faction.Yssaril:
+                case Faction.None:
                     return CombatModule.NullModule();
                 default:
                     throw new Exception($"Faction {faction} flagship has undefined AFB");
@@ -223,6 +276,7 @@ namespace TI4BattleSim.Units
                 case Faction.NRA:
                 case Faction.Nomad:
                 case Faction.Titans:
+                case Faction.None:
                     return CombatModule.NullModule();
                 default:
                     throw new Exception($"Faction {faction} flagship has undefined Bombard");
