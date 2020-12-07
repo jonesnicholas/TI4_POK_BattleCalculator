@@ -47,6 +47,25 @@ namespace TI4BattleSim.Units
                 };
             }
 
+            if (faction == Faction.Jolnar)
+            {
+                spaceCombat.doRoll = (battle, owner, target, num, toHit, dMod, hMod) =>
+                {
+                    int hits = 0;
+                    for (int i = 0; i < num + dMod; i++)
+                    {
+                        int roll = battle.random.Next(1, 11);
+                        if (roll + hMod >= toHit)
+                            hits++;
+                        if (roll >= 9)
+                        {
+                            hits += 2;
+                        }
+                    }
+                    return hits;
+                };
+            }
+
 
             //      Both Empyrian and Hacan need to add 'limit' option
             // TODO: Hacan
@@ -58,8 +77,6 @@ namespace TI4BattleSim.Units
             // TODO: NRA
             // TODO: Nekro
             // TODO: Sardakk
-            // TODO: JolNar
-            // TODO: Winnu
         }
 
         public override void DestroyUnit(Battle battle, Player owner)
