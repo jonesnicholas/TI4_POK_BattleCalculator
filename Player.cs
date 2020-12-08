@@ -21,6 +21,14 @@ namespace TI4BattleSim
         Generic, Graviton, AFB, X89
     };
 
+    /// <summary>
+    /// Enumeration of tasks a player may resolve at the Start of a Combat
+    /// </summary>
+    public enum StartTask
+    {
+        AssaultCannon, MagenOmega, MentakPrefire
+    }
+
     public class Player
     {
         public List<Unit> units;
@@ -28,6 +36,8 @@ namespace TI4BattleSim
         public TechModel techs;
         public List<Faction> commanders;
         public bool isActive;
+
+        private List<StartTask> startTasks;
 
         public Player()
         {
@@ -81,6 +91,71 @@ namespace TI4BattleSim
                     flagship.damage = Damage.None;
                 }
             }
+        }
+
+        public void PrepStartOfCombat(Theater theater)
+        {
+            if (theater == Theater.Space)
+                PrepStartOfSpaceCombat();
+            if (theater == Theater.Ground)
+                PrepStartOfGroundCombat();
+        }
+
+        private void PrepStartOfSpaceCombat()
+        {
+            List<StartTask> tasks = new List<StartTask>();
+            if (faction == Faction.Mentak)
+                tasks.Add(StartTask.MentakPrefire);
+            if (techs.HasTech(Tech.AssaultCannon) && 
+                units.Count(unit => unit.ParticipatesInCombat(Theater.Space) && unit.type != UnitType.Fighter) >= 3)
+            {
+                tasks.Add(StartTask.AssaultCannon);
+            }
+            startTasks = tasks;
+        }
+
+        private void PrepStartOfGroundCombat()
+        {
+            List<StartTask> tasks = new List<StartTask>();
+            if (techs.HasTech(Tech.MagenOmega) && 
+                units.Any(
+                    unit => unit.type == UnitType.PDS || 
+                    unit.type == UnitType.SpaceDock && unit.theater == Theater.Ground))
+            {
+                tasks.Add(StartTask.MagenOmega);
+            }
+            startTasks = tasks;
+        }
+
+        public bool DoStartOfCombat(Battle battle, Player opponent)
+        {
+            if (startTasks == null || startTasks.Count == 0)
+                return false;
+
+            //todo: intelligently strategize order
+            //todo: properly handle tasks becoming invalid due to state changes
+            StartTask task = startTasks.First();
+            switch (task)
+            {
+                case StartTask.AssaultCannon:
+                    // need to recheck num of ships to ensure this is still valid
+                    int nfShips = units.Count(unit => unit.ParticipatesInCombat(Theater.Space) && unit.type != UnitType.Fighter);
+                    opponent.AssignDestroys(battle, 1, this, Theater.Space, canSustain: false);
+                    break;
+                case StartTask.MentakPrefire:
+                    int hits = units
+                        .Where(unit => unit.type == UnitType.Destroyer || unit.type == UnitType.Cruiser)
+                        .OrderBy(unit => unit.spaceCombat.ToHit).Take(2)
+                        .Sum(unit => unit.spaceCombat.doCombat(battle, this, opponent));
+                    opponent.AssignHits(battle, hits, this, Theater.Space);
+                    break;
+                case StartTask.MagenOmega:
+                    // check for structure happens before adding task
+                    opponent.AssignHits(battle, 1, this, Theater.Ground);
+                    break;
+
+            };
+            return true;
         }
 
         public int DoCombatRolls(Battle battle, Player target, Theater theater)
@@ -292,7 +367,7 @@ namespace TI4BattleSim
             return hits;
         }
 
-        void AssignDestroys(Battle battle, int hits, Player source, Theater theater)
+        void AssignDestroys(Battle battle, int hits, Player source, Theater theater, bool canSustain = true)
         {
             // Note, if we reach here, we assume that we've already sustain damage on everything we safely can, 
             // and therefore assign hits assuming we are going to start losing things
@@ -312,13 +387,14 @@ namespace TI4BattleSim
             //todo: consider implementing priority queue
             targets.Sort(Unit.SortCombat(theater));
             bool mentak = theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship();
-                //todo: also mentak mechs
+            //todo: also mentak mechs
+            canSustain &= !mentak;
 
 
             while (hits > 0 && targets.Count > 0)
             {
                 Unit lowPri = targets.First();
-                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None && !mentak)
+                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None && canSustain)
                 {
                     // sustain and sort target list again (priority queue will make this better)
                     lowPri.SustainDamage();

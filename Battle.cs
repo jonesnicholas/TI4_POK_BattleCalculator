@@ -71,17 +71,50 @@ namespace TI4BattleSim
             if (winner != Winner.None)
                 return winner;
 
+            StartOfCombat(Theater.Space);
             AntiFighterBarrage();
 
             EvaluateWinner(Theater.Space);
 
+            int combatRound = 0;
             while (winner == Winner.None)
             {
-                SimulateCombatRound(Theater.Space);
+                combatRound++;
+                StartOfCombatRound(Theater.Space);
+                SimulateCombatRound(Theater.Space, combatRound);
                 EvaluateWinner(Theater.Space);
             }
 
             return winner;
+        }
+
+        private void StartOfCombatRound(Theater theater)
+        {
+            // Nothing yet!
+        }
+
+        private void StartOfCombat(Theater theater)
+        {
+            attacker.PrepStartOfCombat(theater);
+            defender.PrepStartOfCombat(theater);
+
+            bool attackerCanRespond = true;
+            bool defenderCanRespond = true;
+            while (attackerCanRespond || defenderCanRespond)
+            {
+                if (attackerCanRespond)
+                {
+                    bool attackerDidSomething = attacker.DoStartOfCombat(this, defender);
+                    attackerCanRespond = attackerDidSomething;
+                    defenderCanRespond |= attackerDidSomething;
+                }
+                if (defenderCanRespond)
+                {
+                    bool defenderDidSomething = defender.DoStartOfCombat(this, attacker);
+                    defenderCanRespond = defenderDidSomething;
+                    attackerCanRespond |= defenderDidSomething;
+                }
+            }
         }
 
         public void SpaceCannonOffense()
@@ -122,9 +155,11 @@ namespace TI4BattleSim
 
             EvaluateWinner(Theater.Ground);
             //gcr
+            int combatRound = 0;
             while (winner == Winner.None)
             {
-                SimulateCombatRound(Theater.Ground);
+                combatRound++;
+                SimulateCombatRound(Theater.Ground, combatRound);
                 EvaluateWinner(Theater.Ground);
             }
             EndOfGroundCombat();
@@ -164,7 +199,7 @@ namespace TI4BattleSim
             defender.AssignHits(this, bombardHits, attacker, Theater.Ground);
         }
 
-        public void SimulateCombatRound(Theater theater)
+        public void SimulateCombatRound(Theater theater, int round = 0)
         {
             attacker.DoStartOfCombatRound(theater);
             defender.DoStartOfCombatRound(theater);
