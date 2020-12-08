@@ -172,8 +172,27 @@ namespace TI4BattleSim
             int attackerHits = attacker.DoCombatRolls(this, defender, theater);
             int defenderHits = defender.DoCombatRolls(this, attacker, theater);
 
+            if (theater == Theater.Ground)
+            {
+                ValkyrieParticleWeave(ref attackerHits, ref defenderHits);
+            }
+
             attacker.AssignHits(this, defenderHits, defender, theater);
             defender.AssignHits(this, attackerHits, attacker, theater);
+        }
+
+        private void ValkyrieParticleWeave(ref int attackerHits, ref int defenderHits)
+        {
+            bool actValk = false;
+            if (defenderHits > 0 && attacker.HasTech(Tech.Valkyrie))
+            {
+                attackerHits++;
+                actValk = true;
+            }
+            if (attackerHits > 0 && defender.HasTech(Tech.Valkyrie))
+                defenderHits++;
+            if (!actValk && defenderHits > 0 && attacker.HasTech(Tech.Valkyrie))
+                attackerHits++;
         }
 
         public void EvaluateWinner(Theater theater)

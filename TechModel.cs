@@ -19,7 +19,6 @@ namespace TI4BattleSim
     //      Duranium Armor
     //      AssaultCannon
     //      Dimensional Splicer
-    //      Valkyrie Particle Weave
     //      Supercharge
 
     public class TechModel
