@@ -214,6 +214,9 @@ namespace TI4BattleSim
 
             attacker.AssignHits(this, defenderHits, defender, theater);
             defender.AssignHits(this, attackerHits, attacker, theater);
+
+            attacker.DuraniumArmor(theater);
+            defender.DuraniumArmor(theater);
         }
 
         private void ValkyrieParticleWeave(ref int attackerHits, ref int defenderHits)

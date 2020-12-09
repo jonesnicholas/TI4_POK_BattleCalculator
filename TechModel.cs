@@ -15,9 +15,6 @@ namespace TI4BattleSim
     //      Graviton
     //      Impusle Core
     //      Magen Defense Grid (Not Omega)
-    //      Magen Defense Grid Omega
-    //      Duranium Armor
-    //      AssaultCannon
     //      Dimensional Splicer
     //      Supercharge
 

@@ -72,7 +72,7 @@ namespace TI4BattleSim
 
         public int DoAntiFighterBarrage(Battle battle, Player target)
         {
-            Unit highRoller = units.OrderBy(unit => unit.antiFighter.ToHit).First();
+            Unit highRoller = units.OrderByDescending(unit => unit.antiFighter.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
@@ -145,7 +145,7 @@ namespace TI4BattleSim
                 case StartTask.MentakPrefire:
                     int hits = units
                         .Where(unit => unit.type == UnitType.Destroyer || unit.type == UnitType.Cruiser)
-                        .OrderBy(unit => unit.spaceCombat.ToHit).Take(2)
+                        .OrderByDescending(unit => unit.spaceCombat.ToHit).Take(2)
                         .Sum(unit => unit.spaceCombat.doCombat(battle, this, opponent));
                     opponent.AssignHits(battle, hits, this, Theater.Space);
                     break;
@@ -194,13 +194,36 @@ namespace TI4BattleSim
             return hits;
         }
 
+        internal void DuraniumArmor(Theater theater)
+        {
+            List<Unit> candidates = 
+                units.Where(unit => unit.ParticipatesInCombat(theater) && unit.damage == Damage.Damaged).ToList();
+
+            if (faction == Faction.Barony && HasFlagship())
+            {
+                //don't waste time repairing Barony's flagship
+                candidates.RemoveAll(unit => unit.type == UnitType.Flagship);
+            }
+            //todo: verify this properly handles the special case of NRA fighters pre-damaged in space
+            candidates.OrderBy(unit => theater == Theater.Space ? unit.spaceCombat.effectiveness : unit.groundCombat.effectiveness);
+            
+            // todo: titans pds too
+            if (candidates.Any(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)))
+            {
+                //repair safe sustains first
+                candidates.First(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)).Repair();
+                return;
+            }
+            candidates.First().Repair();
+        }
+
         public int DoSpaceCannonOffense(Battle battle, Player target)
         {
             if (target.faction == Faction.Argent && target.HasFlagship())
                 return 0;
             // todo incorporate:
             //  JolNar Commander
-            Unit highRoller = units.OrderBy(unit => unit.spaceCannon.ToHit).First();
+            Unit highRoller = units.OrderByDescending(unit => unit.spaceCannon.ToHit).First();
 
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
@@ -224,7 +247,7 @@ namespace TI4BattleSim
 
             // todo incorporate:
             //  JolNar Commander
-            Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderBy(unit => unit.spaceCannon.ToHit).First();
+            Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderByDescending(unit => unit.spaceCannon.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
@@ -249,7 +272,7 @@ namespace TI4BattleSim
             // todo incorporate:
             //  JolNar Commander
             // x89?
-            Unit highRoller = units.OrderBy(unit => unit.bombard.ToHit).First();
+            Unit highRoller = units.OrderByDescending(unit => unit.bombard.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
