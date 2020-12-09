@@ -19,10 +19,9 @@ namespace TI4BattleSim
             canSustain = sustain;
         }
 
-        public int doCombat(Battle battle, Player owner, Player target)
+        public int doCombat(Battle battle, Player owner, Player target, int nDiceMod = 0, int hitMod = 0)
         {
-            // TODO: Pass In Mods somehow
-            return doRoll(battle, owner, target, NumDice, ToHit, 0, 0);
+            return doRoll(battle, owner, target, NumDice, ToHit, nDiceMod, hitMod);
         }
 
         public Func<Battle, Player, Player, int, int, int, int, int> doRoll = defaultRoll;

@@ -71,17 +71,50 @@ namespace TI4BattleSim
             if (winner != Winner.None)
                 return winner;
 
+            StartOfCombat(Theater.Space);
             AntiFighterBarrage();
 
             EvaluateWinner(Theater.Space);
 
+            int combatRound = 0;
             while (winner == Winner.None)
             {
-                SimulateCombatRound(Theater.Space);
+                combatRound++;
+                StartOfCombatRound(Theater.Space);
+                SimulateCombatRound(Theater.Space, combatRound);
                 EvaluateWinner(Theater.Space);
             }
 
             return winner;
+        }
+
+        private void StartOfCombatRound(Theater theater)
+        {
+            // Nothing yet!
+        }
+
+        private void StartOfCombat(Theater theater)
+        {
+            attacker.PrepStartOfCombat(theater);
+            defender.PrepStartOfCombat(theater);
+
+            bool attackerCanRespond = true;
+            bool defenderCanRespond = true;
+            while (attackerCanRespond || defenderCanRespond)
+            {
+                if (attackerCanRespond)
+                {
+                    bool attackerDidSomething = attacker.DoStartOfCombat(this, defender);
+                    attackerCanRespond = attackerDidSomething;
+                    defenderCanRespond |= attackerDidSomething;
+                }
+                if (defenderCanRespond)
+                {
+                    bool defenderDidSomething = defender.DoStartOfCombat(this, attacker);
+                    defenderCanRespond = defenderDidSomething;
+                    attackerCanRespond |= defenderDidSomething;
+                }
+            }
         }
 
         public void SpaceCannonOffense()
@@ -122,12 +155,24 @@ namespace TI4BattleSim
 
             EvaluateWinner(Theater.Ground);
             //gcr
+            int combatRound = 0;
             while (winner == Winner.None)
             {
-                SimulateCombatRound(Theater.Ground);
+                combatRound++;
+                SimulateCombatRound(Theater.Ground, combatRound);
                 EvaluateWinner(Theater.Ground);
             }
+            EndOfGroundCombat();
             return winner;
+        }
+
+        private void EndOfGroundCombat()
+        {
+            Player victor = winner == Winner.Attacker ? attacker : defender;
+            if (victor.HasTech(Tech.Daaxive))
+            {
+                victor.AddUnit(UnitType.Infantry);
+            }
         }
 
         private void CommitGroundForces()
@@ -154,7 +199,7 @@ namespace TI4BattleSim
             defender.AssignHits(this, bombardHits, attacker, Theater.Ground);
         }
 
-        public void SimulateCombatRound(Theater theater)
+        public void SimulateCombatRound(Theater theater, int round = 0)
         {
             attacker.DoStartOfCombatRound(theater);
             defender.DoStartOfCombatRound(theater);
@@ -162,8 +207,30 @@ namespace TI4BattleSim
             int attackerHits = attacker.DoCombatRolls(this, defender, theater);
             int defenderHits = defender.DoCombatRolls(this, attacker, theater);
 
+            if (theater == Theater.Ground)
+            {
+                ValkyrieParticleWeave(ref attackerHits, ref defenderHits);
+            }
+
             attacker.AssignHits(this, defenderHits, defender, theater);
             defender.AssignHits(this, attackerHits, attacker, theater);
+
+            attacker.DuraniumArmor(theater);
+            defender.DuraniumArmor(theater);
+        }
+
+        private void ValkyrieParticleWeave(ref int attackerHits, ref int defenderHits)
+        {
+            bool actValk = false;
+            if (defenderHits > 0 && attacker.HasTech(Tech.Valkyrie))
+            {
+                attackerHits++;
+                actValk = true;
+            }
+            if (attackerHits > 0 && defender.HasTech(Tech.Valkyrie))
+                defenderHits++;
+            if (!actValk && defenderHits > 0 && attacker.HasTech(Tech.Valkyrie))
+                attackerHits++;
         }
 
         public void EvaluateWinner(Theater theater)

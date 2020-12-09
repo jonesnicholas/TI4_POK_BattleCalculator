@@ -21,6 +21,14 @@ namespace TI4BattleSim
         Generic, Graviton, AFB, X89
     };
 
+    /// <summary>
+    /// Enumeration of tasks a player may resolve at the Start of a Combat
+    /// </summary>
+    public enum StartTask
+    {
+        AssaultCannon, MagenOmega, MentakPrefire
+    }
+
     public class Player
     {
         public List<Unit> units;
@@ -28,6 +36,8 @@ namespace TI4BattleSim
         public TechModel techs;
         public List<Faction> commanders;
         public bool isActive;
+
+        private List<StartTask> startTasks;
 
         public Player()
         {
@@ -62,7 +72,7 @@ namespace TI4BattleSim
 
         public int DoAntiFighterBarrage(Battle battle, Player target)
         {
-            Unit highRoller = units.OrderBy(unit => unit.antiFighter.ToHit).First();
+            Unit highRoller = units.OrderByDescending(unit => unit.antiFighter.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
@@ -81,6 +91,71 @@ namespace TI4BattleSim
                     flagship.damage = Damage.None;
                 }
             }
+        }
+
+        public void PrepStartOfCombat(Theater theater)
+        {
+            if (theater == Theater.Space)
+                PrepStartOfSpaceCombat();
+            if (theater == Theater.Ground)
+                PrepStartOfGroundCombat();
+        }
+
+        private void PrepStartOfSpaceCombat()
+        {
+            List<StartTask> tasks = new List<StartTask>();
+            if (faction == Faction.Mentak)
+                tasks.Add(StartTask.MentakPrefire);
+            if (techs.HasTech(Tech.AssaultCannon) && 
+                units.Count(unit => unit.ParticipatesInCombat(Theater.Space) && unit.type != UnitType.Fighter) >= 3)
+            {
+                tasks.Add(StartTask.AssaultCannon);
+            }
+            startTasks = tasks;
+        }
+
+        private void PrepStartOfGroundCombat()
+        {
+            List<StartTask> tasks = new List<StartTask>();
+            if (techs.HasTech(Tech.MagenOmega) && 
+                units.Any(
+                    unit => unit.type == UnitType.PDS || 
+                    unit.type == UnitType.SpaceDock && unit.theater == Theater.Ground))
+            {
+                tasks.Add(StartTask.MagenOmega);
+            }
+            startTasks = tasks;
+        }
+
+        public bool DoStartOfCombat(Battle battle, Player opponent)
+        {
+            if (startTasks == null || startTasks.Count == 0)
+                return false;
+
+            //todo: intelligently strategize order
+            //todo: properly handle tasks becoming invalid due to state changes
+            StartTask task = startTasks.First();
+            switch (task)
+            {
+                case StartTask.AssaultCannon:
+                    // need to recheck num of ships to ensure this is still valid
+                    int nfShips = units.Count(unit => unit.ParticipatesInCombat(Theater.Space) && unit.type != UnitType.Fighter);
+                    opponent.AssignDestroys(battle, 1, this, Theater.Space, canSustain: false);
+                    break;
+                case StartTask.MentakPrefire:
+                    int hits = units
+                        .Where(unit => unit.type == UnitType.Destroyer || unit.type == UnitType.Cruiser)
+                        .OrderByDescending(unit => unit.spaceCombat.ToHit).Take(2)
+                        .Sum(unit => unit.spaceCombat.doCombat(battle, this, opponent));
+                    opponent.AssignHits(battle, hits, this, Theater.Space);
+                    break;
+                case StartTask.MagenOmega:
+                    // check for structure happens before adding task
+                    opponent.AssignHits(battle, 1, this, Theater.Ground);
+                    break;
+
+            };
+            return true;
         }
 
         public int DoCombatRolls(Battle battle, Player target, Theater theater)
@@ -119,38 +194,73 @@ namespace TI4BattleSim
             return hits;
         }
 
+        internal void DuraniumArmor(Theater theater)
+        {
+            List<Unit> candidates = 
+                units.Where(unit => unit.ParticipatesInCombat(theater) && unit.damage == Damage.Damaged).ToList();
+
+            if (faction == Faction.Barony && HasFlagship())
+            {
+                //don't waste time repairing Barony's flagship
+                candidates.RemoveAll(unit => unit.type == UnitType.Flagship);
+            }
+            //todo: verify this properly handles the special case of NRA fighters pre-damaged in space
+            candidates.OrderBy(unit => theater == Theater.Space ? unit.spaceCombat.effectiveness : unit.groundCombat.effectiveness);
+            
+            // todo: titans pds too
+            if (candidates.Any(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)))
+            {
+                //repair safe sustains first
+                candidates.First(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)).Repair();
+                return;
+            }
+            candidates.First().Repair();
+        }
+
         public int DoSpaceCannonOffense(Battle battle, Player target)
         {
             if (target.faction == Faction.Argent && target.HasFlagship())
                 return 0;
             // todo incorporate:
             //  JolNar Commander
-            //  plasma scoring
-            //  anti-mass
-            Unit highRoller = units.OrderBy(unit => unit.spaceCannon.ToHit).First();
+            Unit highRoller = units.OrderByDescending(unit => unit.spaceCannon.ToHit).First();
+
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
+            if (HasTech(Tech.PlasmaScoring))
+                mod++;
+
             highRoller.spaceCannon.NumDice += mod;
-            int hits = units.Sum(unit => unit.spaceCannon.doCombat(battle, this, target));
+
+            int hMod = target.HasTech(Tech.Antimass) ? -1 : 0;
+
+            int hits = units.Sum(unit => unit.spaceCannon.doCombat(battle, this, target, hitMod:hMod));
             highRoller.spaceCannon.NumDice -= mod;
             return hits;
         }
 
         internal int DoSpaceCannonDefense(Battle battle, Player target)
         {
+            if (target.HasTech(Tech.L4Disruptors))
+                return 0;
+
             // todo incorporate:
             //  JolNar Commander
-            //  plasma scoring
-            //  anti-mass
-            Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderBy(unit => unit.spaceCannon.ToHit).First();
+            Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderByDescending(unit => unit.spaceCannon.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
+            if (HasTech(Tech.PlasmaScoring))
+                mod++;
+
             highRoller.spaceCannon.NumDice += mod;
+
+            int hMod = target.HasTech(Tech.Antimass) ? -1 : 0;
+
             int hits = 
                 units.Where(unit => unit.theater != Theater.Space)
-                .Sum(unit => unit.spaceCannon.doCombat(battle, this, target));
+                .Sum(unit => unit.spaceCannon.doCombat(battle, this, target, hitMod:hMod));
             highRoller.spaceCannon.NumDice -= mod;
             return hits;
         }
@@ -161,13 +271,14 @@ namespace TI4BattleSim
                 return 0;
             // todo incorporate:
             //  JolNar Commander
-            //  plasma scoring
-            //  planetary shield + bypasses
             // x89?
-            Unit highRoller = units.OrderBy(unit => unit.bombard.ToHit).First();
+            Unit highRoller = units.OrderByDescending(unit => unit.bombard.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
+            if (HasTech(Tech.PlasmaScoring))
+                mod++;
+
             highRoller.bombard.NumDice += mod;
             int hits = units.Sum(unit => unit.bombard.doCombat(battle, this, target));
             highRoller.bombard.NumDice -= mod;
@@ -225,6 +336,7 @@ namespace TI4BattleSim
                 {
                     //todo: implement intelligent targeting
                     Unit target = targets.First();
+                    // intentionally *not* calling the sustainDamage method, as this doesn't create sustain damage triggers
                     target.damage = Damage.Damaged;
                     targets.Remove(target);
                     hits--;
@@ -268,16 +380,17 @@ namespace TI4BattleSim
             //todo: add Nomad and NaazRokha Mechs to space
             //todo: support barony double-sustain
             //todo: intelligently sort and eliminate low-priority targets first
-            int i = 0;
-            while (i<targets.Count && i<hits)
-            {// todo: consider popping off items instead of indexing
-                targets[i].SustainDamage();
-                i++;
+            while (targets.Count > 0 && hits > 0)
+            {
+                Unit target = targets.First();
+                target.SustainDamage();
+                hits -= (HasTech(Tech.NES) ? 2 : 1);
             }
-            return hits - i;
+
+            return hits;
         }
 
-        void AssignDestroys(Battle battle, int hits, Player source, Theater theater)
+        void AssignDestroys(Battle battle, int hits, Player source, Theater theater, bool canSustain = true)
         {
             // Note, if we reach here, we assume that we've already sustain damage on everything we safely can, 
             // and therefore assign hits assuming we are going to start losing things
@@ -297,17 +410,18 @@ namespace TI4BattleSim
             //todo: consider implementing priority queue
             targets.Sort(Unit.SortCombat(theater));
             bool mentak = theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship();
-                //todo: also mentak mechs
+            //todo: also mentak mechs
+            canSustain &= !mentak;
 
 
             while (hits > 0 && targets.Count > 0)
             {
                 Unit lowPri = targets.First();
-                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None && !mentak)
+                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None && canSustain)
                 {
                     // sustain and sort target list again (priority queue will make this better)
                     lowPri.SustainDamage();
-                    hits--; //todo: Barony nonsense
+                    hits -= (HasTech(Tech.NES) ? 2 : 1);
                     targets.Sort(Unit.SortCombat(theater));
                 }
                 else
@@ -317,6 +431,16 @@ namespace TI4BattleSim
                     hits--;
                 }
             }
+        }
+
+        public bool HasTech(Tech tech)
+        {
+            return techs.HasTech(tech);
+        }
+
+        public void AddUnit(UnitType type)
+        {
+            units.Add(Unit.CreateUnit(type, techs, faction));
         }
 
         public static List<Faction> GetAllFactions()

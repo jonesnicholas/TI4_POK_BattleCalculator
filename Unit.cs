@@ -95,6 +95,14 @@ namespace TI4BattleSim
             damage = Damage.RecentlyDamaged;
         }
 
+        public void Repair()
+        {
+            if (damage == Damage.None)
+                throw new Exception("Tried to repair a unit that wasn't damaged");
+
+            damage = Damage.None;
+        }
+
         public virtual void DestroyUnit(Battle battle, Player owner)
         {
             owner.units.Remove(this);
