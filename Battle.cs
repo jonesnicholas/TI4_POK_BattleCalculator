@@ -119,29 +119,26 @@ namespace TI4BattleSim
 
         public void SpaceCannonOffense()
         {
-            //pds
             //todo: fully implement graviton
             int ApdsHits = attacker.DoSpaceCannonOffense(this, defender);
             int DpdsHits = defender.DoSpaceCannonOffense(this, attacker);
-            attacker.AssignHits(this, DpdsHits, defender, Theater.Space);
-            defender.AssignHits(this, ApdsHits, attacker, Theater.Space);
+            attacker.AssignPDSHits(this, DpdsHits, defender, Theater.Space);
+            defender.AssignPDSHits(this, ApdsHits, attacker, Theater.Space);
 
             foreach (Player player in others)
             {
                 int otherHits = player.DoSpaceCannonOffense(this, attacker);
-                attacker.AssignHits(this, otherHits, player, Theater.Space);
+                attacker.AssignPDSHits(this, otherHits, player, Theater.Space);
             }
         }
 
         public void AntiFighterBarrage()
         {
-            //todo: find all commanders and promissory notes referencing anti-fighter barrage
-
             int AafbHits = attacker.DoAntiFighterBarrage(this, defender);
             int DafbHits = defender.DoAntiFighterBarrage(this, attacker);
 
-            attacker.AssignHits(this, DafbHits, defender, Theater.Space, HitType.AFB);
-            defender.AssignHits(this, AafbHits, attacker, Theater.Space, HitType.AFB);
+            attacker.AssignAFBHits(this, DafbHits, defender);
+            defender.AssignAFBHits(this, AafbHits, attacker);
         }
 
         public Winner SimulateGroundCombat()
@@ -189,14 +186,14 @@ namespace TI4BattleSim
         private void SpaceCannonDefense()
         {
             int spaceCannonHits = defender.DoSpaceCannonDefense(this, attacker);
-            attacker.AssignHits(this, spaceCannonHits, defender, Theater.Ground);
+            attacker.AssignPDSHits(this, spaceCannonHits, defender, Theater.Ground);
         }
 
         private void Bombardment()
         {
             int bombardHits = attacker.DoBombardment(this, defender);
             //todo: implement X89
-            defender.AssignHits(this, bombardHits, attacker, Theater.Ground);
+            defender.AssignBombardHits(this, bombardHits, attacker, Theater.Ground);
         }
 
         public void SimulateCombatRound(Theater theater, int round = 0)
@@ -212,8 +209,47 @@ namespace TI4BattleSim
                 ValkyrieParticleWeave(ref attackerHits, ref defenderHits);
             }
 
-            attacker.AssignHits(this, defenderHits, defender, theater);
-            defender.AssignHits(this, attackerHits, attacker, theater);
+            while (attackerHits > 0 || defenderHits > 0)
+            {
+                int aBonusHits = 0;
+                int dBonusHits = 0;
+                // bonus hits come from either 'reflective shielding' or sardakk mechs
+
+                // 1) each player tries to safely sustain
+                aBonusHits = attacker.AssignToSustains(ref defenderHits, defender, theater, safe: true);
+                dBonusHits = defender.AssignToSustains(ref attackerHits, attacker, theater, safe: true);
+                if (aBonusHits > 0 || dBonusHits > 0)
+                {
+                    attackerHits += aBonusHits;
+                    defenderHits += dBonusHits;
+                    continue;
+                }
+                //   b) players risking direct hit try risky sustains
+                //       TODO: Implement
+
+                // 3) each player determines their 'assignment profile'
+                //      profile is made assuming all ships selected will be destroyed
+                List<Unit> attackerProfile = attacker.GetAssignmentProfile(this, defenderHits, defender, theater);
+                List<Unit> defenderProfile = defender.GetAssignmentProfile(this, attackerHits, attacker, theater);
+                int asus = attackerProfile.Count(unit => unit.CanSustain(theater) && unit.damage == Damage.None);
+                int dsus = defenderProfile.Count(unit => unit.CanSustain(theater) && unit.damage == Damage.None);
+                attackerHits -= dsus;
+                defenderHits -= asus;
+
+                // 4) each player attempts risky sustains from their 'asignment profile'
+                aBonusHits = attacker.AssignToSustains(ref asus, defender, theater, safe: false);
+                dBonusHits = defender.AssignToSustains(ref dsus, attacker, theater, safe: false);
+                if (aBonusHits > 0 || dBonusHits > 0)
+                {
+                    attackerHits += aBonusHits;
+                    defenderHits += dBonusHits;
+                    continue;
+                }
+
+                // 5) no more sustains should be possible/need, blow things up from here
+                attacker.AssignHits(this, ref defenderHits, defender, theater);
+                defender.AssignHits(this, ref attackerHits, attacker, theater);
+            }
 
             attacker.DuraniumArmor(theater);
             defender.DuraniumArmor(theater);
