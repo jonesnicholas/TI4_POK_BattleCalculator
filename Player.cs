@@ -63,11 +63,17 @@ namespace TI4BattleSim
             isActive = activePlayer;
         }
 
-        public bool HasFlagship()
+        public bool HasFlagship(Faction fctTest = Faction.None)
         {
             if (units == null)
                 return false;
-            return units.Any(unit => unit.type == UnitType.Flagship);
+            
+            bool hasOne = units.Any(unit => unit.type == UnitType.Flagship);
+            if (!hasOne)
+                return false;
+            if (fctTest != Faction.None)
+                return faction == fctTest;
+            return true;
         }
 
         public int DoAntiFighterBarrage(Battle battle, Player target)
@@ -84,6 +90,13 @@ namespace TI4BattleSim
 
         public void DoStartOfCombatRound(Theater theater)
         {
+            // anything that was 'recently damaged' just becomes damaged
+            foreach (Unit unit in units)
+            {
+                if (unit.damage == Damage.RecentlyDamaged)
+                    unit.damage = Damage.Damaged;
+            }
+
             if (faction == Faction.Barony && theater == Theater.Space)
             {
                 foreach (Unit flagship in units.Where(unit => unit.type == UnitType.Flagship))
@@ -114,6 +127,25 @@ namespace TI4BattleSim
             startTasks = tasks;
         }
 
+        internal void AssignPDSHits(Battle battle, int hits, Player source, Theater theater, bool isGraviton = false)
+        {
+            // TODO: Properly handle graviton
+            // TODO: Properly handle capacity saving
+            // 1) assign to 'safe sustains first'
+            AssignToSustains(ref hits, source, theater, safe: true, inCombat: false);
+
+            // 2) TODO: Assign to risky sustains if desired.
+
+            // 3) Get 'Assignment profile' to determine number of unsafe sustains needed, and sustain on them
+            List<Unit> targetProfile = GetAssignmentProfile(battle, hits, source, theater);
+            int asus = targetProfile.Count(unit => unit.CanSustain(theater) && unit.damage == Damage.None);
+            hits -= asus;
+            AssignToSustains(ref asus, source, theater, safe: false, inCombat: false);
+
+            // 4) assing remaining hits to weakest ships
+            AssignHits(battle, ref hits, source, theater);
+        }
+
         private void PrepStartOfGroundCombat()
         {
             List<StartTask> tasks = new List<StartTask>();
@@ -140,22 +172,45 @@ namespace TI4BattleSim
                 case StartTask.AssaultCannon:
                     // need to recheck num of ships to ensure this is still valid
                     int nfShips = units.Count(unit => unit.ParticipatesInCombat(Theater.Space) && unit.type != UnitType.Fighter);
-                    opponent.AssignDestroys(battle, 1, this, Theater.Space, canSustain: false);
+                    opponent.AssignDestroys(battle, 1, this, Theater.Space);
                     break;
                 case StartTask.MentakPrefire:
                     int hits = units
                         .Where(unit => unit.type == UnitType.Destroyer || unit.type == UnitType.Cruiser)
                         .OrderByDescending(unit => unit.spaceCombat.ToHit).Take(2)
                         .Sum(unit => unit.spaceCombat.doCombat(battle, this, opponent));
-                    opponent.AssignHits(battle, hits, this, Theater.Space);
+                    opponent.AssignHits(battle, ref hits, this, Theater.Space);
                     break;
                 case StartTask.MagenOmega:
                     // check for structure happens before adding task
-                    opponent.AssignHits(battle, 1, this, Theater.Ground);
+                    int hit = 1;
+                    opponent.AssignHits(battle, ref hit, this, Theater.Ground);
                     break;
 
             };
             return true;
+        }
+
+        internal void AssignBombardHits(Battle battle, int bombardHits, Player attacker, Theater ground)
+        {
+            // TODO: Implement
+            throw new NotImplementedException();
+        }
+
+        private void AssignDestroys(Battle battle, int destroys, Player source, Theater theater)
+        {
+            List<Unit> targets = units
+                .Where(unit => unit.ParticipatesInCombat(theater))
+                .OrderBy(unit => unit.TheaterEffectiveness(theater))
+                .ToList();
+            // todo: try to avoid wasting on things that can still sustain
+            while (targets.Count > 0 && destroys > 0)
+            {
+                Unit target = targets.First();
+                targets.Remove(target);
+                units.Remove(target);
+                destroys--;
+            }
         }
 
         public int DoCombatRolls(Battle battle, Player target, Theater theater)
@@ -196,33 +251,36 @@ namespace TI4BattleSim
 
         internal void DuraniumArmor(Theater theater)
         {
-            List<Unit> candidates = 
-                units.Where(unit => unit.ParticipatesInCombat(theater) && unit.damage == Damage.Damaged).ToList();
+            //If has duranium, repair unit
+            if (techs.HasTech(Tech.Duranium))
+            {
+                List<Unit> candidates =
+                    units.Where(unit => unit.ParticipatesInCombat(theater) && unit.damage == Damage.Damaged).ToList();
 
-            if (faction == Faction.Barony && HasFlagship())
-            {
-                //don't waste time repairing Barony's flagship
-                candidates.RemoveAll(unit => unit.type == UnitType.Flagship);
+                if (faction == Faction.Barony && HasFlagship())
+                {
+                    //don't waste time repairing Barony's flagship
+                    candidates.RemoveAll(unit => unit.type == UnitType.Flagship);
+                }
+                //todo: verify this properly handles the special case of NRA fighters pre-damaged in space
+                candidates.OrderBy(unit => theater == Theater.Space ? unit.spaceCombat.effectiveness : unit.groundCombat.effectiveness);
+
+                // todo: titans pds too
+                if (candidates.Any(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)))
+                {
+                    //repair safe sustains first
+                    candidates.First(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)).Repair();
+                    return;
+                }
+                if (candidates.Count > 0)
+                    candidates.First().Repair();
             }
-            //todo: verify this properly handles the special case of NRA fighters pre-damaged in space
-            candidates.OrderBy(unit => theater == Theater.Space ? unit.spaceCombat.effectiveness : unit.groundCombat.effectiveness);
-            
-            // todo: titans pds too
-            if (candidates.Any(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)))
-            {
-                //repair safe sustains first
-                candidates.First(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)).Repair();
-                return;
-            }
-            candidates.First().Repair();
         }
 
         public int DoSpaceCannonOffense(Battle battle, Player target)
         {
             if (target.faction == Faction.Argent && target.HasFlagship())
                 return 0;
-            // todo incorporate:
-            //  JolNar Commander
             Unit highRoller = units.OrderByDescending(unit => unit.spaceCannon.ToHit).First();
 
             int mod = 0;
@@ -244,9 +302,6 @@ namespace TI4BattleSim
         {
             if (target.HasTech(Tech.L4Disruptors))
                 return 0;
-
-            // todo incorporate:
-            //  JolNar Commander
             Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderByDescending(unit => unit.spaceCannon.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
@@ -269,9 +324,6 @@ namespace TI4BattleSim
         {
             if (target.units.Any(unit => unit.hasPlanetaryShield) && !target.units.Any(unit => unit.bypassPlanetaryShield))
                 return 0;
-            // todo incorporate:
-            //  JolNar Commander
-            // x89?
             Unit highRoller = units.OrderByDescending(unit => unit.bombard.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
@@ -285,29 +337,7 @@ namespace TI4BattleSim
             return hits;
         }
 
-        public void AssignHits(Battle battle, int hits, Player source, Theater theater, HitType hitType = HitType.Generic)
-        {
-            if (hits <= 0)
-                return;
-
-            if (hitType == HitType.AFB)
-            {
-                AssignAFBHits(battle, hits, source);
-                return;
-            }
-            //todo: handle graviton
-            //todo: properly handle Titan PDS in ground combats
-
-            //todo: find way to intelligently 'switch in' different hit assigning philosophies.
-            // first, assign to safe sustains
-            hits = AssignToSustains(hits, source, theater, safe:true);
-            // then, if risking direct hit, assign to unsafe sustains
-            hits = AssignToSustains(hits, source, theater);
-            // then, assign to ships that might blow up
-            AssignDestroys(battle, hits, source, theater);
-        }
-
-        void AssignAFBHits(Battle battle, int hits, Player source)
+        public void AssignAFBHits(Battle battle, int hits, Player source)
         {
             if (hits <= 0)
                 return;
@@ -344,92 +374,74 @@ namespace TI4BattleSim
             }
         }
 
-        int AssignToSustains(int hits, Player source, Theater theater, bool safe = false)
+        public int AssignToSustains(ref int hits, Player source, Theater theater, bool safe = false, bool inCombat = true)
         {
-            if (theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship())
-            {
-                return hits;
-            }
+            if (hits <= 0)
+                return 0;
 
-            List<Unit> targets = new List<Unit>();
-            if (theater == Theater.Space)
-            {
-                targets = units.Where(unit =>
-                    unit.ParticipatesInCombat(theater) && //todo: make this work for Nomad Mechs
-                    unit.spaceCombat.canSustain &&
-                    unit.damage == Damage.None
-                ).ToList();
-            }
-            if (theater == Theater.Ground)
-            {
-                targets = units.Where(unit => 
-                    unit.ParticipatesInCombat(theater) &&
-                    unit.groundCombat.canSustain &&
-                    unit.damage == Damage.None
-                ).ToList();
-            }
+            bool nonSustainable = 
+                (theater == Theater.Space && source.HasFlagship(Faction.Mentak)) ||
+                (theater == Theater.Ground && source.faction == Faction.Mentak && source.units.Any(unit => unit.type == UnitType.Mech));
+
+            if (nonSustainable)
+                return 0;
+
+            // todo: properly handle nomad mech in space
+            List<Unit> candidates = units.Where(unit => unit.ParticipatesInCombat(theater) && unit.CanSustain(theater) && unit.damage == Damage.None).ToList();
             if (safe)
             {
-                targets = targets.Where(unit =>
-                unit.type == UnitType.Mech || //todo: also make this work for Titans PDS
-                unit.type == UnitType.Dreadnought && unit.upgraded
-                ).ToList();
+                candidates = candidates.Where(unit => unit.SafeSustain()).ToList();
             }
-            //todo: most of the time, this will be dreads or mechs. 
-            //todo: add UI Cruisers and PDS
-            //todo: add Nomad and NaazRokha Mechs to space
-            //todo: support barony double-sustain
-            //todo: intelligently sort and eliminate low-priority targets first
+
+            int bonusHits = 0;
+            //todo: properly handle risky sustains on things w/ capacity
+
+            //todo: handle decision space for barony dealing w/ odd numbers of hits + NES
+
+            candidates = candidates.OrderBy(unit => unit.TheaterEffectiveness(theater)).ToList();
+            while (candidates.Count > 0 && hits > 0)
+            {
+                Unit candidate = candidates.First();
+                candidate.SustainDamage();
+                if (candidate.type == UnitType.Mech && faction == Faction.Sardakk)
+                    bonusHits++;
+                hits -= techs.HasTech(Tech.NES) ? 2 : 1;
+                candidates.Remove(candidate);
+            }
+            return bonusHits;
+        }
+
+        public List<Unit> GetAssignmentProfile(Battle battle, int hits, Player source, Theater theater)
+        {
+            List<Unit> candidates =
+                units.Where(unit => unit.ParticipatesInCombat(theater))
+                .OrderBy(unit => unit.damage)
+                .OrderBy(unit => unit.TheaterEffectiveness(theater)).ToList();
+
+            return candidates.Take(Math.Min(hits, candidates.Count)).ToList();
+        }
+
+        public void AssignHits(Battle battle, ref int hits, Player source, Theater theater, bool forceDestroy = false)
+        {
+            List<Unit> targets = units
+                .Where(unit => unit.ParticipatesInCombat(theater))
+                .OrderBy(unit => unit.TheaterEffectiveness(theater))
+                .ToList();
+
+            bool nonSustainable =
+                (theater == Theater.Space && source.HasFlagship(Faction.Mentak)) ||
+                (theater == Theater.Ground && source.faction == Faction.Mentak && source.units.Any(unit => unit.type == UnitType.Mech));
+
             while (targets.Count > 0 && hits > 0)
             {
                 Unit target = targets.First();
-                target.SustainDamage();
-                hits -= (HasTech(Tech.NES) ? 2 : 1);
-            }
-
-            return hits;
-        }
-
-        void AssignDestroys(Battle battle, int hits, Player source, Theater theater, bool canSustain = true)
-        {
-            // Note, if we reach here, we assume that we've already sustain damage on everything we safely can, 
-            // and therefore assign hits assuming we are going to start losing things
-            // todo: find a way to intelligently 'swap in' targeting logic.
-            // for now, sort by 'combat rating', and lose
-            // fighters < destroyer < cruiser < dreads <= flagship < warsun
-            // with carriers opportunistically lost when their capacity is "No longer needed"
-
-            // todo: make sure to keep one boot when attacking w/ Naalu flagship
-
-            List<Unit> targets = units.Where(unit =>
-                unit.ParticipatesInCombat(theater)
-            ).ToList();
-            //todo: make sure Nomad mechs properly handled
-
-            //todo: implement intelligent capacity saving in space battles
-            //todo: consider implementing priority queue
-            targets.Sort(Unit.SortCombat(theater));
-            bool mentak = theater == Theater.Space && source.faction == Faction.Mentak && source.HasFlagship();
-            //todo: also mentak mechs
-            canSustain &= !mentak;
-
-
-            while (hits > 0 && targets.Count > 0)
-            {
-                Unit lowPri = targets.First();
-                if (lowPri.CanSustain(theater) && lowPri.damage == Damage.None && canSustain)
+                if (!forceDestroy && target.damage == Damage.None && target.CanSustain(theater) && !nonSustainable)
                 {
-                    // sustain and sort target list again (priority queue will make this better)
-                    lowPri.SustainDamage();
-                    hits -= (HasTech(Tech.NES) ? 2 : 1);
-                    targets.Sort(Unit.SortCombat(theater));
+                    throw new Exception("tried to assign destroy to something that should still be able to sustain");
                 }
-                else
-                {
-                    targets.Remove(lowPri); //(priority queue will make this better too)
-                    lowPri.DestroyUnit(battle, this);
-                    hits--;
-                }
+                targets.Remove(target);
+                units.Remove(target);
+                hits--;
             }
         }
 

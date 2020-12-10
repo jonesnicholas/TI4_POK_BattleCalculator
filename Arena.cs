@@ -7,7 +7,7 @@ namespace TI4BattleSim
 {
     public class Arena
     {
-        public static void runCrucible(int NumSimulations, Player AttackerModel, Player DefenderModel, List<Player> OthersModel = null, Theater theater = Theater.Hybrid, Random random = null)
+        public static List<double> runCrucible(int NumSimulations, Player AttackerModel, Player DefenderModel, List<Player> OthersModel = null, Theater theater = Theater.Hybrid, Random random = null)
         {
             int awins = 0;
             int dwins = 0;
@@ -40,6 +40,7 @@ namespace TI4BattleSim
             double dwinrate = (double)dwins / NumSimulations;
             double drawrate = (double)draws / NumSimulations;
             Console.WriteLine($"A:{Math.Round(awinrate, 4)} D:{Math.Round(dwinrate, 4)} N:{Math.Round(drawrate, 4)}");
+            return new List<double>() { awinrate, dwinrate, drawrate };
         }
     }
 }

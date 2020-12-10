@@ -15,7 +15,7 @@ namespace TI4BattleSim
         None, RecentlyDamaged, Damaged
     }
 
-    public class Unit : IComparable
+    public class Unit
     {
         public UnitType type;
         public Theater theater;
@@ -99,6 +99,8 @@ namespace TI4BattleSim
         {
             if (damage == Damage.None)
                 throw new Exception("Tried to repair a unit that wasn't damaged");
+            if (damage == Damage.RecentlyDamaged)
+                throw new Exception("Tried to repair a unit that was damaged this round");
 
             damage = Damage.None;
         }
@@ -124,63 +126,19 @@ namespace TI4BattleSim
                 theater == Theater.Ground && groundCombat.canSustain;
         }
 
-        public int CompareTo(object obj)
-        {
-            Unit other = (Unit)obj;
-            // using default comparator for comparing capacity
-            return capacity - other.capacity;
-        }
-
-        public static IComparer<Unit> SortCombat(Theater theater)
+        public int TheaterEffectiveness(Theater theater)
         {
             if (theater == Theater.Space)
-                return new SortSpaceCombatHelper();
+                return spaceCombat.effectiveness;
             if (theater == Theater.Ground)
-                return new SortGroundCombatHelper();
-            throw new Exception("Tried to sort by a combat value other than space or ground");
+                return groundCombat.effectiveness;
+            return 0;
         }
 
-        private class SortSpaceCombatHelper : IComparer<Unit>
+        public virtual bool SafeSustain()
         {
-            int IComparer<Unit>.Compare(Unit unit1, Unit unit2)
-            {
-                int comp = unit1.spaceCombat.effectiveness.CompareTo(unit2.spaceCombat.effectiveness);
-                if (comp == 0)
-                {
-                    // prioritize assigning hits to things that can still sustain over those that can't
-                    if (unit1.spaceCombat.canSustain && unit1.damage == Damage.None)
-                        comp++;
-                    if (unit2.spaceCombat.canSustain && unit2.damage == Damage.None)
-                        comp--;
-                }
-                if (comp == 0)
-                {
-                    // todo: prioritize losing "cheaper" things
-                    comp = unit1.type - unit2.type;
-                }
-                return comp;
-            }
+            return type == UnitType.Mech || type == UnitType.Dreadnought && upgraded;
         }
-
-        private class SortGroundCombatHelper : IComparer<Unit>
-        {
-            int IComparer<Unit>.Compare(Unit unit1, Unit unit2)
-            {
-                int comp = unit1.groundCombat.effectiveness.CompareTo(unit2.groundCombat.effectiveness);
-                if (comp == 0)
-                {
-                    // prioritize assigning hits to things that can still sustain over those that can't
-                    if (unit1.groundCombat.canSustain && unit1.damage == Damage.None)
-                        comp++;
-                    if (unit2.groundCombat.canSustain && unit2.damage == Damage.None)
-                        comp--;
-                }
-                return comp;
-            }
-        }
-
-
-
 
         public static List<UnitType> GetAllTypes()
         {

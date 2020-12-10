@@ -18,6 +18,14 @@ namespace TI4BattleSim.Units
             {
                 groundCombat = new CombatModule(1, upgraded ? 6 : 7, sustain: true);
             }
+
+            // todo: make sure Nekro can properly yoink this, and other faction specific upgrades.
+        }
+
+        public override bool SafeSustain()
+        {
+            // currently, all pds types that can participate in ground combat can also safely sustain damage
+            return (ParticipatesInCombat(Theater.Ground));
         }
     }
 }
