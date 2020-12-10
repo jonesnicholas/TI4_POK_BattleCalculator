@@ -99,6 +99,8 @@ namespace TI4BattleSim
         {
             if (damage == Damage.None)
                 throw new Exception("Tried to repair a unit that wasn't damaged");
+            if (damage == Damage.RecentlyDamaged)
+                throw new Exception("Tried to repair a unit that was damaged this round");
 
             damage = Damage.None;
         }

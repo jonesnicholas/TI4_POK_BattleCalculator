@@ -90,6 +90,13 @@ namespace TI4BattleSim
 
         public void DoStartOfCombatRound(Theater theater)
         {
+            // anything that was 'recently damaged' just becomes damaged
+            foreach (Unit unit in units)
+            {
+                if (unit.damage == Damage.RecentlyDamaged)
+                    unit.damage = Damage.Damaged;
+            }
+
             if (faction == Faction.Barony && theater == Theater.Space)
             {
                 foreach (Unit flagship in units.Where(unit => unit.type == UnitType.Flagship))
@@ -244,25 +251,30 @@ namespace TI4BattleSim
 
         internal void DuraniumArmor(Theater theater)
         {
-            List<Unit> candidates = 
-                units.Where(unit => unit.ParticipatesInCombat(theater) && unit.damage == Damage.Damaged).ToList();
+            //If has duranium, repair unit
+            if (techs.HasTech(Tech.Duranium))
+            {
+                List<Unit> candidates =
+                    units.Where(unit => unit.ParticipatesInCombat(theater) && unit.damage == Damage.Damaged).ToList();
 
-            if (faction == Faction.Barony && HasFlagship())
-            {
-                //don't waste time repairing Barony's flagship
-                candidates.RemoveAll(unit => unit.type == UnitType.Flagship);
+                if (faction == Faction.Barony && HasFlagship())
+                {
+                    //don't waste time repairing Barony's flagship
+                    candidates.RemoveAll(unit => unit.type == UnitType.Flagship);
+                }
+                //todo: verify this properly handles the special case of NRA fighters pre-damaged in space
+                candidates.OrderBy(unit => theater == Theater.Space ? unit.spaceCombat.effectiveness : unit.groundCombat.effectiveness);
+
+                // todo: titans pds too
+                if (candidates.Any(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)))
+                {
+                    //repair safe sustains first
+                    candidates.First(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)).Repair();
+                    return;
+                }
+                if (candidates.Count > 0)
+                    candidates.First().Repair();
             }
-            //todo: verify this properly handles the special case of NRA fighters pre-damaged in space
-            candidates.OrderBy(unit => theater == Theater.Space ? unit.spaceCombat.effectiveness : unit.groundCombat.effectiveness);
-            
-            // todo: titans pds too
-            if (candidates.Any(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)))
-            {
-                //repair safe sustains first
-                candidates.First(unit => unit.type == UnitType.Mech || (unit.type == UnitType.Dreadnought && unit.upgraded)).Repair();
-                return;
-            }
-            candidates.First().Repair();
         }
 
         public int DoSpaceCannonOffense(Battle battle, Player target)
@@ -375,7 +387,7 @@ namespace TI4BattleSim
                 return 0;
 
             // todo: properly handle nomad mech in space
-            List<Unit> candidates = units.Where(unit => unit.ParticipatesInCombat(theater) && unit.CanSustain(theater)).ToList();
+            List<Unit> candidates = units.Where(unit => unit.ParticipatesInCombat(theater) && unit.CanSustain(theater) && unit.damage == Damage.None).ToList();
             if (safe)
             {
                 candidates = candidates.Where(unit => unit.SafeSustain()).ToList();
@@ -394,6 +406,7 @@ namespace TI4BattleSim
                 if (candidate.type == UnitType.Mech && faction == Faction.Sardakk)
                     bonusHits++;
                 hits -= techs.HasTech(Tech.NES) ? 2 : 1;
+                candidates.Remove(candidate);
             }
             return bonusHits;
         }
@@ -402,6 +415,7 @@ namespace TI4BattleSim
         {
             List<Unit> candidates =
                 units.Where(unit => unit.ParticipatesInCombat(theater))
+                .OrderBy(unit => unit.damage)
                 .OrderBy(unit => unit.TheaterEffectiveness(theater)).ToList();
 
             return candidates.Take(Math.Min(hits, candidates.Count)).ToList();

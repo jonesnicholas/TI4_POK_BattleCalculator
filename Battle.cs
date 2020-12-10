@@ -249,6 +249,7 @@ namespace TI4BattleSim
                 // 5) no more sustains should be possible/need, blow things up from here
                 attacker.AssignHits(this, ref defenderHits, defender, theater);
                 defender.AssignHits(this, ref attackerHits, attacker, theater);
+                break;
             }
 
             attacker.DuraniumArmor(theater);
