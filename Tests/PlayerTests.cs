@@ -16,9 +16,10 @@ namespace TI4BattleSim
             Faction fct = Faction.Argent;
             TechModel tech = new TechModel();
             List<Faction> cmds = new List<Faction>();
+            OptionsModel opts = new OptionsModel();
             bool act = true;
 
-            Player player = new Player(menu, fct, tech, cmds, act);
+            Player player = new Player(menu, fct, tech, cmds, opts,  act);
             //assume unit creation failures check elsewhere, just verifying counts here
             Assert.AreNotSame(menu, player.units);
             foreach (UnitType unitType in Unit.GetAllTypes())
@@ -39,6 +40,8 @@ namespace TI4BattleSim
             TechModelTests.VerifyTechsEmpty(nullPlayer.techs);
             Assert.IsNotNull(nullPlayer.commanders);
             Assert.AreEqual(0, nullPlayer.commanders.Count);
+            Assert.IsNotNull(nullPlayer.options);
+            OptionsModelTests.VerifyOptionsDefault(nullPlayer.options);
             Assert.AreEqual(false, nullPlayer.isActive);
         }
 
@@ -53,6 +56,8 @@ namespace TI4BattleSim
             TechModelTests.VerifyTechsEmpty(player.techs);
             Assert.IsNotNull(player.commanders);
             Assert.AreEqual(0, player.commanders.Count);
+            Assert.IsNotNull(player.options);
+            OptionsModelTests.VerifyOptionsDefault(player.options);
             Assert.IsFalse(player.isActive);
         }
 
@@ -61,11 +66,12 @@ namespace TI4BattleSim
         {
             List<Unit> menu = new List<Unit>();
             Faction fct = Faction.Argent;
-            TechModel tech = new TechModel();
+            TechModel tech = new TechModel(); //todo: add random set of parameters
             List<Faction> cmds = new List<Faction>();
+            OptionsModel opts = new OptionsModel(); //todo: add random set of parameters
             bool act = true;
 
-            Player player = new Player(menu, fct, tech, cmds, act);
+            Player player = new Player(menu, fct, tech, cmds, opts, act);
             Player copy = Player.CopyPlayer(player);
             CheckMatchingPlayers(player, copy);
         }
@@ -86,6 +92,8 @@ namespace TI4BattleSim
             Assert.AreEqual(a.commanders.Count, b.commanders.Count);
             Assert.IsTrue(a.commanders.All(b.commanders.Contains));
             Assert.IsTrue(b.commanders.All(a.commanders.Contains));
+            Assert.AreNotSame(a.options, b.options);
+            OptionsModelTests.VerifyOptionsMatch(a.options, b.options);
             Assert.AreEqual(a.isActive, b.isActive);
         }
     }

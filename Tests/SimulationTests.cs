@@ -33,12 +33,32 @@ namespace TI4BattleSim
         public void ArgentDestroyersScenario()
         {
             //verifies argent destroyers function as expected
-            List<double> sims = Scenarios.ArgentFlightSim();
+            List<double> sims = Scenarios.ArgentFlightDestroyerSim();
             List<double> predicted = new List<double>() { 0.6762, 0.2909, 0.0329 };
             AssertWithinTolerances(predicted, sims);
         }
 
-        public void AssertWithinTolerances(List<double> predicted, List<double> simulated, double tolerance = 0.01)
+        [TestMethod]
+        public void UpgradedCruisersScenario()
+        {
+            //verifies cruisers upgrade as expected
+            //todo: verify capacity concerns as well
+            List<double> sims = Scenarios.CruiserSim();
+            List<double> predicted = new List<double>() { 0.6316, 0.3319, 0.0365 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void TitansCruisersScenario()
+        {
+            //verifies titan cruisers upgrade as expected
+            //todo: verify capacity concerns as well
+            List<double> sims = Scenarios.TitansCruiserSim();
+            List<double> predicted = new List<double>() { 0.6316, 0.3319, 0.0365 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        public static void AssertWithinTolerances(List<double> predicted, List<double> simulated, double tolerance = 0.01)
         {
             Assert.AreEqual(3, predicted.Count);
             Assert.AreEqual(3, simulated.Count);
@@ -48,7 +68,7 @@ namespace TI4BattleSim
             }
         }
 
-        public bool AssertAreRoughlyEqual(double a, double b, double tolerance)
+        public static bool AssertAreRoughlyEqual(double a, double b, double tolerance)
         {
             return Math.Abs(a - b) <= tolerance;
         }

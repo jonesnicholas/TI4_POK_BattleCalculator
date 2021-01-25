@@ -35,6 +35,7 @@ namespace TI4BattleSim
         public Faction faction; //todo: may need to use class instead of enum for agents
         public TechModel techs;
         public List<Faction> commanders;
+        public OptionsModel options;
         public bool isActive;
 
         private List<StartTask> startTasks;
@@ -45,20 +46,22 @@ namespace TI4BattleSim
             faction = Faction.None;
             techs = new TechModel();
             commanders = new List<Faction>();
+            options = new OptionsModel();
             isActive = false;
         }
 
         public static Player CopyPlayer(Player player)
         {
-            Player copy = new Player(player.units, player.faction, player.techs, player.commanders, player.isActive);
+            Player copy = new Player(player.units, player.faction, player.techs, player.commanders, player.options, player.isActive);
             return copy;
         }
 
-        public Player(List<Unit> unitMenu, Faction fct, TechModel techModel = null, List<Faction> cmds = null, bool activePlayer = false)
+        public Player(List<Unit> unitMenu, Faction fct, TechModel techModel = null, List<Faction> cmds = null, OptionsModel optionModel = null, bool activePlayer = false)
         {
             faction = fct;
             techs = techModel == null ? new TechModel() : TechModel.CopyTechModel(techModel); //todo: verify that these are making copies, not references
             commanders = cmds == null ? new List<Faction>() : new List<Faction>(cmds);
+            options = optionModel == null ? new OptionsModel() : OptionsModel.CopyOptionsModel(optionModel);
             units = Unit.CreateUnitList(unitMenu, techs, faction);
             isActive = activePlayer;
         }
@@ -134,7 +137,11 @@ namespace TI4BattleSim
             // 1) assign to 'safe sustains first'
             AssignToSustains(ref hits, source, theater, safe: true, inCombat: false);
 
-            // 2) TODO: Assign to risky sustains if desired.
+            // 2) assign to risky sustains if desired.
+            if (options.riskDirectHit)
+            {
+                AssignToSustains(ref hits, source, theater, safe: false, inCombat: false);
+            }
 
             // 3) Get 'Assignment profile' to determine number of unsafe sustains needed, and sustain on them
             List<Unit> targetProfile = GetAssignmentProfile(battle, hits, source, theater);
@@ -413,6 +420,7 @@ namespace TI4BattleSim
 
         public List<Unit> GetAssignmentProfile(Battle battle, int hits, Player source, Theater theater)
         {
+            //todo: need to properly handle holding on to things with capacity
             List<Unit> candidates =
                 units.Where(unit => unit.ParticipatesInCombat(theater))
                 .OrderBy(unit => unit.damage)
@@ -423,6 +431,7 @@ namespace TI4BattleSim
 
         public void AssignHits(Battle battle, ref int hits, Player source, Theater theater, bool forceDestroy = false)
         {
+            //todo: need to properly handle holding on to things with capacity
             List<Unit> targets = units
                 .Where(unit => unit.ParticipatesInCombat(theater))
                 .OrderBy(unit => unit.TheaterEffectiveness(theater))
