@@ -193,7 +193,7 @@ namespace TI4BattleSim
         {
             int bombardHits = attacker.DoBombardment(this, defender);
             //todo: implement X89
-            defender.AssignBombardHits(this, bombardHits, attacker, Theater.Ground);
+            defender.AssignBombardHits(this, bombardHits, attacker);
         }
 
         public void SimulateCombatRound(Theater theater, int round = 0)
