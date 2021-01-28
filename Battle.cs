@@ -225,7 +225,15 @@ namespace TI4BattleSim
                     continue;
                 }
                 //   b) players risking direct hit try risky sustains
-                //       TODO: Implement
+                // 2) assign to risky sustains if desired.
+                if (attacker.options.riskDirectHit)
+                {
+                    attacker.AssignToSustains(ref defenderHits, defender, theater, safe: false, inCombat: false);
+                }
+                if (defender.options.riskDirectHit)
+                {
+                    defender.AssignToSustains(ref attackerHits, attacker, theater, safe: false, inCombat: false);
+                }
 
                 // 3) each player determines their 'assignment profile'
                 //      profile is made assuming all ships selected will be destroyed

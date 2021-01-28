@@ -8,8 +8,7 @@ namespace TI4BattleSim
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            Scenarios.DreadnoughtSim(100000);
-            
+            Scenarios.RiskDirectHitsSim(100000);
         }
     }
 }
