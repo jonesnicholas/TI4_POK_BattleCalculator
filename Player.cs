@@ -341,7 +341,7 @@ namespace TI4BattleSim
 
         public int DoBombardment(Battle battle, Player target)
         {
-            if (target.units.Any(unit => unit.hasPlanetaryShield) && !target.units.Any(unit => unit.bypassPlanetaryShield))
+            if (target.units.Any(unit => unit.hasPlanetaryShield) && !units.Any(unit => unit.bypassPlanetaryShield))
                 return 0;
             Unit highRoller = units.OrderByDescending(unit => unit.bombard.ToHit).First();
             int mod = 0;
