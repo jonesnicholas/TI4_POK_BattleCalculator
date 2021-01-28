@@ -58,6 +58,51 @@ namespace TI4BattleSim
             AssertWithinTolerances(predicted, sims);
         }
 
+        [TestMethod]
+        public void UpgradedInfantryScenario()
+        {
+            //verifies that infantry upgrade as expected
+            List<double> sims = Scenarios.InfantrySim();
+            List<double> predicted = new List<double>() { 0.6288, 0.3712, 0.00 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void GenericMechScenario()
+        {
+            //verifies that mechs perform as expected
+            List<double> sims = Scenarios.GenericMechSim();
+            List<double> predicted = new List<double>() { 0.407, 0.593, 0.00 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void BombardScenario()
+        {
+            //verifies that units bombard as expected
+            List<double> sims = Scenarios.BombardSim();
+            List<double> predicted = new List<double>() { 0.5088, 0.4912, 0.00 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void SpaceCannonDefenseScenario()
+        {
+            //verifies that units bombard as expected
+            List<double> sims = Scenarios.SpaceCannonDefenseSim();
+            List<double> predicted = new List<double>() { 0.638, 0.362, 0.00 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void MixedGenericGroundCombatScenario()
+        {
+            //verifies that mechs perform as expected
+            List<double> sims = Scenarios.MixedGenericGroundCombatSim();
+            List<double> predicted = new List<double>() { 0.4668, 0.5332, 0.00 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
         public static void AssertWithinTolerances(List<double> predicted, List<double> simulated, double tolerance = 0.01)
         {
             Assert.AreEqual(3, predicted.Count);
