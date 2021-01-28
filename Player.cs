@@ -81,6 +81,9 @@ namespace TI4BattleSim
 
         public int DoAntiFighterBarrage(Battle battle, Player target)
         {
+            if (units.Count == 0)
+                return 0;
+
             Unit highRoller = units.OrderByDescending(unit => unit.antiFighter.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
@@ -198,10 +201,13 @@ namespace TI4BattleSim
             return true;
         }
 
-        internal void AssignBombardHits(Battle battle, int bombardHits, Player attacker, Theater ground)
+        internal void AssignBombardHits(Battle battle, int bombardHits, Player attacker)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            // TODO: Implement X89
+            if (bombardHits <= 0)
+                return;
+            AssignToSustains(ref bombardHits, attacker, Theater.Ground, inCombat: false);
+            AssignDestroys(battle, bombardHits, attacker, Theater.Ground);
         }
 
         private void AssignDestroys(Battle battle, int destroys, Player source, Theater theater)
@@ -288,6 +294,9 @@ namespace TI4BattleSim
         {
             if (target.faction == Faction.Argent && target.HasFlagship())
                 return 0;
+            if (units.Count == 0)
+                return 0;
+
             Unit highRoller = units.OrderByDescending(unit => unit.spaceCannon.ToHit).First();
 
             int mod = 0;
@@ -309,6 +318,9 @@ namespace TI4BattleSim
         {
             if (target.HasTech(Tech.L4Disruptors))
                 return 0;
+            if (units.Count == 0)
+                return 0;
+
             Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderByDescending(unit => unit.spaceCannon.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
@@ -329,7 +341,7 @@ namespace TI4BattleSim
 
         public int DoBombardment(Battle battle, Player target)
         {
-            if (target.units.Any(unit => unit.hasPlanetaryShield) && !target.units.Any(unit => unit.bypassPlanetaryShield))
+            if (target.units.Any(unit => unit.hasPlanetaryShield) && !units.Any(unit => unit.bypassPlanetaryShield))
                 return 0;
             Unit highRoller = units.OrderByDescending(unit => unit.bombard.ToHit).First();
             int mod = 0;
