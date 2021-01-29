@@ -76,7 +76,5 @@ namespace TI4BattleSim
             randomMock.Verify(mock => mock.Next(It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(numDice));
             Assert.AreEqual(verification.Count(n => n >= combatVal), hits);
         }
-
-
     }
 }

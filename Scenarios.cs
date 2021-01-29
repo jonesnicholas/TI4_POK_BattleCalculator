@@ -582,5 +582,49 @@ namespace TI4BattleSim
 
             return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
         }
+
+        public static List<double> Antimass_SpaceCannonOffenseSim(int simCount = 1000)
+        { 
+            // 2 cruiser + 2 fighters
+            // vs
+            // 1 cruiser + 1 fighter + 4 pds2
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Cruiser, 2);
+            attackerCounts.Add(UnitType.Fighter, 2);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            TechModel techModel = new TechModel();
+            techModel.techs.Add(Tech.Antimass);
+            Player attackerModel = new Player(attackerUnits, Faction.None, techModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Cruiser, 1);
+            defenderCounts.Add(UnitType.Fighter, 1);
+            defenderCounts.Add(UnitType.PDS, 4);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+        }
+
+        public static List<double> Antimass_SpaceCannonDefenseSim(int simCount = 1000)
+        {
+            // 2 infantry 
+            // vs
+            // 1 infantry + 2 pds
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Infantry, 2);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            TechModel techModel = new TechModel();
+            techModel.techs.Add(Tech.Antimass);
+            Player attackerModel = new Player(attackerUnits, Faction.None, techModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Infantry, 1);
+            defenderCounts.Add(UnitType.PDS, 2);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+        }
     }
 }
