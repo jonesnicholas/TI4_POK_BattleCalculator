@@ -386,6 +386,61 @@ namespace TI4BattleSim
             return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
         }
 
+        public static List<double> SpaceCannonOffenseSim(int simCount = 1000)
+        {
+            // 2 cruiser + 2 fighters + 1pds
+            // vs
+            // 2 cruiser + 2 fighters + 2pds
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Cruiser, 2);
+            attackerCounts.Add(UnitType.Fighter, 2);
+            attackerCounts.Add(UnitType.PDS, 1);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            TechModel techModel = new TechModel();
+            Player attackerModel = new Player(attackerUnits, Faction.None, techModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Cruiser, 2);
+            defenderCounts.Add(UnitType.Fighter, 2);
+            defenderCounts.Add(UnitType.PDS, 2);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+        }
+
+        public static List<double> SpaceCannonOffenseThirdPartySim(int simCount = 1000)
+        {
+            // 2 dread + 2 fighters + 1pds
+            // vs
+            // 2 cruiser + 2 fighters + 1 pds + 1 third party PDS
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Cruiser, 2);
+            attackerCounts.Add(UnitType.Fighter, 2);
+            attackerCounts.Add(UnitType.PDS, 1);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            TechModel techModel = new TechModel();
+            Player attackerModel = new Player(attackerUnits, Faction.None, techModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Cruiser, 2);
+            defenderCounts.Add(UnitType.Fighter, 2);
+            defenderCounts.Add(UnitType.PDS, 1);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            Dictionary<UnitType, int> thirdPartyCounts = new Dictionary<UnitType, int>();
+            thirdPartyCounts.Add(UnitType.PDS, 1);
+            List<Unit> thirdPartyUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player thirdPartyModel = new Player(defenderUnits, Faction.None);
+
+            List<Player> othersModel = new List<Player>() { thirdPartyModel };
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, othersModel, theater: Theater.Space, random: new Random(0));
+        }
+
+        //TODO: Scenari for space cannon defence w/ "external" pds
+
         public static List<double> MixedSpaceCannonDefenseSim(int simCount = 1000)
         {
             // 1 mech + 1 infantry

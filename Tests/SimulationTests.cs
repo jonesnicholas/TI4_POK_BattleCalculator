@@ -83,6 +83,24 @@ namespace TI4BattleSim
         }
 
         [TestMethod]
+        public void SpaceCannonOffenseScenario()
+        {
+            // verifies that space cannon offense occurs as expected
+            List<double> sims = Scenarios.SpaceCannonOffenseSim();
+            List<double> predicted = new List<double>() { 0.347, 0.6059, 0.0471 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void SpaceCannonOffenseThirdPartyScenario()
+        {
+            // verifies that space cannon offense occurs as expected with "third parties"
+            List<double> sims = Scenarios.SpaceCannonOffenseThirdPartySim();
+            List<double> predicted = new List<double>() { 0.347, 0.6059, 0.0471 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
         public void PlanetaryShieldPDSScenario()
         {
             // verifies pds blocks generic bombardment
