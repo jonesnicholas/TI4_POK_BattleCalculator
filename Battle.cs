@@ -247,6 +247,12 @@ namespace TI4BattleSim
                 // 4) each player attempts risky sustains from their 'asignment profile'
                 aBonusHits = attacker.AssignToSustains(ref asus, defender, theater, safe: false);
                 dBonusHits = defender.AssignToSustains(ref dsus, attacker, theater, safe: false);
+
+                //HACK: handles cases where sustains couldn't be done, generally due to Mentak Mech/Flagship
+                //TODO: Figure out more intuitive way to do this
+                attackerHits += dsus;
+                defenderHits += asus;
+
                 if (aBonusHits > 0 || dBonusHits > 0)
                 {
                     attackerHits += aBonusHits;
