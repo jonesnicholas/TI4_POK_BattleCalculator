@@ -159,14 +159,14 @@ namespace TI4BattleSim
                 SimulateCombatRound(Theater.Ground, combatRound);
                 EvaluateWinner(Theater.Ground);
             }
-            EndOfGroundCombat();
+            EndOfGroundCombat(combatRound);
             return winner;
         }
 
-        private void EndOfGroundCombat()
+        private void EndOfGroundCombat(int combatRound = 0)
         {
             Player victor = winner == Winner.Attacker ? attacker : defender;
-            if (victor.HasTech(Tech.Daaxive))
+            if (combatRound > 0 && victor.HasTech(Tech.Dacxive))
             {
                 victor.AddUnit(UnitType.Infantry);
             }
