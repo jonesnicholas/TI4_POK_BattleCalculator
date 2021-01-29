@@ -458,7 +458,13 @@ namespace TI4BattleSim
                 Unit target = targets.First();
                 if (!forceDestroy && target.damage == Damage.None && target.CanSustain(theater) && !nonSustainable)
                 {
-                    throw new Exception("tried to assign destroy to something that should still be able to sustain");
+                    // Allowing this for now, but
+                    // TODO: Make sure that this isn't called for things that can still potentially sustain
+                    // damn Mentak screwing everything up...
+                    if (source.faction != Faction.Mentak)
+                    {
+                        throw new Exception("tried to assign destroy to something that should still be able to sustain");
+                    }
                 }
                 targets.Remove(target);
                 units.Remove(target);
