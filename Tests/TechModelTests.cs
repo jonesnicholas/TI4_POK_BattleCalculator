@@ -21,7 +21,8 @@ namespace TI4BattleSim
             Assert.AreEqual(a.upgrades.Count, b.upgrades.Count);
             Assert.IsTrue(a.upgrades.All(b.upgrades.Contains));
             Assert.IsTrue(b.upgrades.All(a.upgrades.Contains));
-
+            Assert.IsTrue(a.techs.All(b.techs.Contains));
+            Assert.IsTrue(b.techs.All(a.techs.Contains));
         }
 
         public static void VerifyTechsEmpty(TechModel tech)
