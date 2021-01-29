@@ -409,6 +409,29 @@ namespace TI4BattleSim
             return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
         }
 
+        public static List<double> UpgradedSpaceCannonOffenseSim(int simCount = 1000)
+        {
+            // 2 cruiser + 2 fighters
+            // vs
+            // 1 cruiser + 1 fighter + 4 pds2
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Cruiser, 2);
+            attackerCounts.Add(UnitType.Fighter, 2);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            Player attackerModel = new Player(attackerUnits, Faction.None);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Cruiser, 1);
+            defenderCounts.Add(UnitType.Fighter, 1);
+            defenderCounts.Add(UnitType.PDS, 4);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            TechModel techModel = new TechModel();
+            techModel.upgrades.Add(UnitType.PDS);
+            Player defenderModel = new Player(defenderUnits, Faction.None, techModel);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+        }
+
         public static List<double> SpaceCannonOffenseThirdPartySim(int simCount = 1000)
         {
             // 2 dread + 2 fighters + 1pds
