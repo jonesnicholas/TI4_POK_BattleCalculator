@@ -9,16 +9,6 @@ namespace TI4BattleSim
     public class UpgradeTests
     {
         [TestMethod]
-        public void UpgradedDestroyersScenario()
-        {
-            //verifies AFB working as expected
-            //verifies destroyers upgrade as expected
-            List<double> sims = Scenarios.DestroyerSim();
-            List<double> predicted = new List<double>() { 0.9127, 0.0791, 0.0082 };
-            SimulationTests.AssertWithinTolerances(predicted, sims);
-        }
-
-        [TestMethod]
         public void UpgradedCruisersScenario()
         {
             //verifies cruisers upgrade as expected
@@ -29,23 +19,22 @@ namespace TI4BattleSim
         }
 
         [TestMethod]
+        public void UpgradedDestroyersScenario()
+        {
+            //verifies AFB working as expected
+            //verifies destroyers upgrade as expected
+            List<double> sims = Scenarios.DestroyerSim();
+            List<double> predicted = new List<double>() { 0.9127, 0.0791, 0.0082 };
+            SimulationTests.AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
         public void UpgradedDreadnoughtScenario()
         {
             //verifies dreads sustain as expected
             //verifies 'safe' sustain works as expected
             List<double> sims = Scenarios.DreadnoughtSim();
             List<double> predicted = new List<double>() { 0.5821, 0.3702, 0.0477 };
-            SimulationTests.AssertWithinTolerances(predicted, sims);
-        }
-
-        [TestMethod]
-        public void UpgradeFighterScenario()
-        {
-            //verifies fighters upgrade as expected
-            //todo: possibly use this to check for how fighter upgrades change fleet supply / capacity?
-
-            List<double> sims = Scenarios.FighterSim();
-            List<double> predicted = new List<double>() { 0.8236, 0.171, 0.0053 };
             SimulationTests.AssertWithinTolerances(predicted, sims);
         }
 
@@ -73,6 +62,17 @@ namespace TI4BattleSim
             //verifies that pds upgrade as expected for Space Cannon Offense
             List<double> sims = Scenarios.UpgradedSpaceCannonDefenseSim();
             List<double> predicted = new List<double>() { 0.377, 0.5564, 0.0666 };
+            SimulationTests.AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void UpgradeFighterScenario()
+        {
+            //verifies fighters upgrade as expected
+            //todo: possibly use this to check for how fighter upgrades change fleet supply / capacity?
+
+            List<double> sims = Scenarios.FighterSim();
+            List<double> predicted = new List<double>() { 0.8236, 0.171, 0.0053 };
             SimulationTests.AssertWithinTolerances(predicted, sims);
         }
     }
