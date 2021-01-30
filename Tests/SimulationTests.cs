@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace TI4BattleSim
@@ -10,16 +11,23 @@ namespace TI4BattleSim
     {
         public static bool AssertAreRoughlyEqual(double a, double b, double tolerance)
         {
-            return Math.Abs(a - b) <= tolerance;
+           return Math.Abs(a - b) <= tolerance;
         }
 
-        public static void AssertWithinTolerances(List<double> predicted, List<double> simulated, double tolerance = 0.01)
+        public static void AssertWithinTolerances(List<double> predicted, List<double> simulated, double tolerance = 0.02)
         {
             Assert.AreEqual(3, predicted.Count);
             Assert.AreEqual(3, simulated.Count);
             for (int i = 0; i < 3; i++)
             {
-                AssertAreRoughlyEqual(predicted[i], simulated[i], tolerance);
+                bool roughlyEqual = AssertAreRoughlyEqual(predicted[i], simulated[i], tolerance);
+                if (!roughlyEqual)
+                {
+                    Debug.WriteLine($"Expected: {predicted[0]} : {predicted[1]} : {predicted[2]}");
+                    Debug.WriteLine($"Actual:   {simulated[0]} : {simulated[1]} : {simulated[2]}");
+                    Debug.WriteLine("");
+                    Assert.AreEqual(predicted[i], simulated[i]);
+                }
             }
         }
 
@@ -129,7 +137,7 @@ namespace TI4BattleSim
             //verifies titan cruisers upgrade as expected
             //todo: verify capacity concerns as well
             List<double> sims = Scenarios.TitansCruiserSim();
-            List<double> predicted = new List<double>() { 0.6316, 0.3319, 0.0365 };
+            List<double> predicted = new List<double>() { 0.9231, 0.0658, 0.0111 };
             AssertWithinTolerances(predicted, sims);
         }
     }

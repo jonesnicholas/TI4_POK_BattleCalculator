@@ -34,7 +34,7 @@ namespace TI4BattleSim
             //verifies dreads sustain as expected
             //verifies 'safe' sustain works as expected
             List<double> sims = Scenarios.DreadnoughtSim();
-            List<double> predicted = new List<double>() { 0.5821, 0.3702, 0.0477 };
+            List<double> predicted = new List<double>() { 0.5831, 0.3695, 0.04744 };
             SimulationTests.AssertWithinTolerances(predicted, sims);
         }
 
@@ -60,7 +60,7 @@ namespace TI4BattleSim
         public void UpgradedPDSSpaceCannonOffenseScenario()
         {
             //verifies that pds upgrade as expected for Space Cannon Offense
-            List<double> sims = Scenarios.UpgradedSpaceCannonDefenseSim();
+            List<double> sims = Scenarios.UpgradedSpaceCannonOffenseSim();
             List<double> predicted = new List<double>() { 0.377, 0.5564, 0.0666 };
             SimulationTests.AssertWithinTolerances(predicted, sims);
         }

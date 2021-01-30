@@ -200,6 +200,12 @@ namespace TI4BattleSim
             int attackerHits = attacker.DoCombatRolls(this, defender, theater);
             int defenderHits = defender.DoCombatRolls(this, attacker, theater);
 
+            if (round == 1)
+            {
+                attackerHits = defender.CanMagenDefense() ? 0 : attackerHits;
+                defenderHits = attacker.CanMagenDefense() ? 0 : defenderHits;
+            }
+
             if (theater == Theater.Ground)
             {
                 ValkyrieParticleWeave(ref attackerHits, ref defenderHits);

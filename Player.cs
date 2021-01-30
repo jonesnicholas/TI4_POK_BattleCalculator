@@ -79,6 +79,16 @@ namespace TI4BattleSim
             return true;
         }
 
+        public bool CanMagenDefense()
+        {
+            return HasTech(Tech.MagenDefenseGrid) && units.Any(unit => unit.hasPlanetaryShield);
+        }
+
+        public bool CanMagenOmega()
+        {
+            return HasTech(Tech.MagenOmega) && units.Any(unit => unit.type == UnitType.PDS || unit.type == UnitType.SpaceDock);
+        }
+
         public int DoAntiFighterBarrage(Battle battle, Player target)
         {
             if (units.Count(unit => unit.HasAFB) == 0)
