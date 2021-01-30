@@ -166,10 +166,6 @@ namespace TI4BattleSim
         private void EndOfGroundCombat(int combatRound = 0)
         {
             Player victor = winner == Winner.Attacker ? attacker : defender;
-            if (combatRound > 0 && victor.HasTech(Tech.Dacxive))
-            {
-                victor.AddUnit(UnitType.Infantry);
-            }
         }
 
         private void CommitGroundForces()
