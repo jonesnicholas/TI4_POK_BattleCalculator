@@ -119,6 +119,10 @@ namespace TI4BattleSim
 
         public bool HasAFB => antiFighter.NumDice > 0;
 
+        public bool HasBombard => bombard.NumDice > 0;
+
+        public bool HasSpaceCannon => spaceCannon.NumDice > 0;
+
         public bool CanSustain(Theater theater)
         {
             return

@@ -81,10 +81,10 @@ namespace TI4BattleSim
 
         public int DoAntiFighterBarrage(Battle battle, Player target)
         {
-            if (units.Count == 0)
+            if (units.Count(unit => unit.HasAFB) == 0)
                 return 0;
 
-            Unit highRoller = units.OrderByDescending(unit => unit.antiFighter.ToHit).First();
+            Unit highRoller = units.Where(unit => unit.HasAFB).OrderBy(unit => unit.antiFighter.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
@@ -294,10 +294,10 @@ namespace TI4BattleSim
         {
             if (target.faction == Faction.Argent && target.HasFlagship())
                 return 0;
-            if (units.Count == 0)
+            if (units.Count(unit => unit.HasSpaceCannon) == 0)
                 return 0;
 
-            Unit highRoller = units.OrderByDescending(unit => unit.spaceCannon.ToHit).First();
+            Unit highRoller = units.Where(unit => unit.HasSpaceCannon).OrderBy(unit => unit.spaceCannon.ToHit).First();
 
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
@@ -318,10 +318,10 @@ namespace TI4BattleSim
         {
             if (target.HasTech(Tech.L4Disruptors))
                 return 0;
-            if (units.Count == 0)
+            if (units.Count(unit => unit.theater != Theater.Space && unit.HasSpaceCannon) == 0)
                 return 0;
 
-            Unit highRoller = units.Where(unit => unit.theater != Theater.Space).OrderByDescending(unit => unit.spaceCannon.ToHit).First();
+            Unit highRoller = units.Where(unit => unit.theater != Theater.Space && unit.HasSpaceCannon).OrderBy(unit => unit.spaceCannon.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;
@@ -343,7 +343,11 @@ namespace TI4BattleSim
         {
             if (target.units.Any(unit => unit.hasPlanetaryShield) && !units.Any(unit => unit.bypassPlanetaryShield))
                 return 0;
-            Unit highRoller = units.OrderByDescending(unit => unit.bombard.ToHit).First();
+            if (units.Count(unit => unit.HasBombard) == 0)
+                return 0;
+
+
+            Unit highRoller = units.Where(unit => unit.HasBombard).OrderBy(unit => unit.bombard.ToHit).First();
             int mod = 0;
             if (commanders.Contains(Faction.Argent))
                 mod++;

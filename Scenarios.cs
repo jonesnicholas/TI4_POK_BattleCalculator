@@ -92,9 +92,9 @@ namespace TI4BattleSim
 
         public static List<double> BombardSim(int simCount = 1000)
         {
-            // 1 dreadnaught + 1 infantry
+            // 1 dreadnaught + 1 Warsun + 1 infantry
             // vs
-            // 1 infantry
+            // 4 infantry
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
             attackerCounts.Add(UnitType.Dreadnought, 1);
             attackerCounts.Add(UnitType.Warsun, 1);
@@ -340,7 +340,8 @@ namespace TI4BattleSim
             return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
         }
 
-        //TODO: Scenari for space cannon defence w/ "external" pds
+        //TODO: Scenario for space cannon defence w/ "external" pds
+
         public static List<double> NRAMechGroundSim(int simCount = 1000)
         {
             // 1 NRA Mech
@@ -585,9 +586,9 @@ namespace TI4BattleSim
 
         public static List<double> Antimass_SpaceCannonOffenseSim(int simCount = 1000)
         { 
-            // 2 cruiser + 2 fighters
+            // 2 cruiser + 2 fighters w/ antimass
             // vs
-            // 1 cruiser + 1 fighter + 4 pds2
+            // 1 cruiser + 1 fighter + 4 pds
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
             attackerCounts.Add(UnitType.Cruiser, 2);
             attackerCounts.Add(UnitType.Fighter, 2);
@@ -608,7 +609,7 @@ namespace TI4BattleSim
 
         public static List<double> Antimass_SpaceCannonDefenseSim(int simCount = 1000)
         {
-            // 2 infantry 
+            // 2 infantry w/ Antimass
             // vs
             // 1 infantry + 2 pds
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
@@ -623,6 +624,72 @@ namespace TI4BattleSim
             defenderCounts.Add(UnitType.PDS, 2);
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+        }
+
+        public static List<double> PlasmaScoring_BombardSim(int simCount = 1000)
+        {
+            // 1 dreadnaught + 1 Warsun + 1 infantry w/ plasma scoring
+            // vs
+            // 5 infantry
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Dreadnought, 1);
+            attackerCounts.Add(UnitType.Warsun, 1);
+            attackerCounts.Add(UnitType.Infantry, 1);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            TechModel techModel = new TechModel();
+            techModel.techs.Add(Tech.PlasmaScoring);
+            Player attackerModel = new Player(attackerUnits, Faction.None, techModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Infantry, 5);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+        }
+
+        public static List<double> PlasmaScoring_SpaceCannonOffenseSim(int simCount = 1000)
+        {
+            // 1 cruiser + 2 fighters
+            // vs
+            // 1 cruiser + 1 fighter + 1 pds w/ plasma scoring
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Cruiser, 1);
+            attackerCounts.Add(UnitType.Fighter, 2);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            Player attackerModel = new Player(attackerUnits, Faction.None);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Cruiser, 1);
+            defenderCounts.Add(UnitType.Fighter, 1);
+            defenderCounts.Add(UnitType.PDS, 1);
+            TechModel techModel = new TechModel();
+            techModel.techs.Add(Tech.PlasmaScoring);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.None, techModel);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+        }
+
+        public static List<double> PlasmaScoring_SpaceCannonDefenseSim(int simCount = 1000)
+        {
+            // 2 infantry
+            // vs
+            // 1 infantry + 1 pds w/ plasma scoring
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Infantry, 2);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            Player attackerModel = new Player(attackerUnits, Faction.None);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Infantry, 1);
+            defenderCounts.Add(UnitType.PDS, 1);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            TechModel techModel = new TechModel();
+            techModel.techs.Add(Tech.PlasmaScoring);
+            Player defenderModel = new Player(defenderUnits, Faction.None, techModel);
 
             return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
         }
