@@ -640,7 +640,7 @@ namespace TI4BattleSim
         public static List<double> VeldyrDreadSim(int simCount = 1000, bool veldyr = true, bool tech = true, bool upgrade = true)
         {
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
-            attackerCounts.Add(UnitType.Dreadnought, 2);
+            attackerCounts.Add(UnitType.Dreadnought, 1);
             attackerCounts.Add(UnitType.Mech, 2);
             attackerCounts.Add(UnitType.Fighter, 2);
             attackerCounts.Add(UnitType.Carrier, 1);
@@ -656,7 +656,7 @@ namespace TI4BattleSim
             Player attackerModel = new Player(attackerUnits, veldyr ? Faction.Veldyr : Faction.None, atechModel);
 
             Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
-            defenderCounts.Add(UnitType.Dreadnought, 2);
+            defenderCounts.Add(UnitType.Dreadnought, 1);
             defenderCounts.Add(UnitType.Fighter, 2);
             defenderCounts.Add(UnitType.Carrier, 1);
             defenderCounts.Add(UnitType.Cruiser, 1);
