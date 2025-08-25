@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Text;
 
 namespace TI4BattleSim
 {
     class Scenarios
     {
-        public static List<double> ArborecMechSim(int simCount = 1000)
+        public static List<double> ArborecMechSim(int simCount = 10000)
         {
             // 3 infantry + 5 dreads
             // vs
@@ -24,10 +25,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.Arborec);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> ArborecMechVsWarSunSim(int simCount = 1000)
+        public static List<double> ArborecMechVsWarSunSim(int simCount = 10000)
         {
             // 1 war sun + 1 dreadnought + 1 infantry
             // vs
@@ -46,17 +47,16 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> ArgentFlightDestroyerSim(int simCount = 1000)
+        public static List<double> ArgentFlightDestroyerSim(int simCount = 10000)
         {
-            // 3 upgraded argent destroyers + 3 fighters w/ Argent Commander
+            // 2 upgraded argent destroyers w/ Argent Commander
             //      vs
-            // 3 generic dreads + 3 fighters
+            // 1 generic dreads + 3 fighters
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
-            attackerCounts.Add(UnitType.Destroyer, 3);
-            attackerCounts.Add(UnitType.Fighter, 3);
+            attackerCounts.Add(UnitType.Destroyer, 2);
             List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
             TechModel techModel = new TechModel();
             techModel.upgrades.Add(UnitType.Destroyer);
@@ -64,15 +64,15 @@ namespace TI4BattleSim
             Player attackerModel = new Player(attackerUnits, Faction.Argent, techModel, acmds);
 
             Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
-            defenderCounts.Add(UnitType.Dreadnought, 3);
+            defenderCounts.Add(UnitType.Dreadnought, 1);
             defenderCounts.Add(UnitType.Fighter, 3);
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> BaseFactionMechSim(Faction faction = Faction.None, int simCount = 1000)
+        public static List<double> BaseFactionMechSim(Faction faction = Faction.None, int simCount = 10000)
         {
             // 1 faction mech, no options (e.g. no +2 Nekro/Naalu)
             // vs
@@ -87,14 +87,11 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> BombardSim(int simCount = 1000)
+        public static List<double> BombardSim(int simCount = 10000)
         {
-            // 1 dreadnaught + 1 infantry
-            // vs
-            // 1 infantry
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
             attackerCounts.Add(UnitType.Dreadnought, 1);
             attackerCounts.Add(UnitType.Warsun, 1);
@@ -108,10 +105,29 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> Churn(int simCount = 1000)
+        public static List<double> BombardMixedSim(int simCount = 10000)
+        {
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Dreadnought, 1);
+            attackerCounts.Add(UnitType.Warsun, 1);
+            attackerCounts.Add(UnitType.Infantry, 2);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            TechModel techModel = new TechModel();
+            Player attackerModel = new Player(attackerUnits, Faction.None, techModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Infantry, 1);
+            defenderCounts.Add(UnitType.Mech, 2);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
+        }
+
+        public static List<double> Churn(int simCount = 10000)
         {
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
             attackerCounts.Add(UnitType.Dreadnought, 2);
@@ -130,10 +146,10 @@ namespace TI4BattleSim
             List<Faction> dcmds = new List<Faction>() { Faction.Argent };
             Player defenderModel = new Player(defenderUnits, Faction.Argent, techModel, dcmds);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> CruiserSim(int simCount = 1000)
+        public static List<double> CruiserSim(int simCount = 10000)
         {
             // 3 upgraded cruisers + 3 fighters
             // vs
@@ -152,10 +168,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> DestroyerSim(int simCount = 1000)
+        public static List<double> DestroyerSim(int simCount = 10000)
         {
             // 3 upgraded destroyers + 3 fighters
             //      vs
@@ -174,10 +190,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> DreadnoughtSim(int simCount = 1000)
+        public static List<double> DreadnoughtSim(int simCount = 10000)
         {
             // 3 upgraded destroyers + 3 fighters
             //      vs
@@ -196,10 +212,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> FighterSim(int simCount = 1000)
+        public static List<double> FighterSim(int simCount = 10000)
         {
             // 10 upgraded fighters
             //      vs
@@ -217,9 +233,9 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
-        public static List<double> GenericMechSim(int simCount = 1000)
+        public static List<double> GenericMechSim(int simCount = 10000)
         {
             // 1 mech
             // vs
@@ -235,10 +251,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> InfantrySim(int simCount = 1000)
+        public static List<double> InfantrySim(int simCount = 10000)
         {
             // 3 upgraded infantry
             // vs
@@ -255,10 +271,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> MentakMechSim(int simCount = 1000)
+        public static List<double> MentakMechSim(int simCount = 10000)
         {
             // 1 Mentak Mech
             // vs
@@ -274,10 +290,33 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> MixedBombardSim(int simCount = 1000)
+        public static List<double> PreDamagedMechSim(int simCount = 10000)
+        {
+            // 1 generic Mech
+            // vs
+            // 2 damaged generic Mechs
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Mech, 1);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            TechModel techModel = new TechModel();
+            Player attackerModel = new Player(attackerUnits, Faction.Mentak, techModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Mech, 2);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            foreach (Unit unit in defenderUnits)
+            {
+                unit.damage = Damage.Damaged;
+            }
+            Player defenderModel = new Player(defenderUnits, Faction.None);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
+        }
+
+        public static List<double> MixedBombardSim(int simCount = 10000)
         {
             // 1 dreadnaught + 1 infantry
             // vs
@@ -295,10 +334,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> MixedGenericGroundCombatSim(int simCount = 1000)
+        public static List<double> MixedGenericGroundCombatSim(int simCount = 10000)
         {
             // 1 mech + 2 infantry
             // vs
@@ -316,10 +355,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> MixedSpaceCannonDefenseSim(int simCount = 1000)
+        public static List<double> MixedSpaceCannonDefenseSim(int simCount = 10000)
         {
             // 1 mech + 1 infantry
             // vs
@@ -337,11 +376,11 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        //TODO: Scenari for space cannon defence w/ "external" pds
-        public static List<double> NRAMechGroundSim(int simCount = 1000)
+        //TODO: Scenario for space cannon defence w/ "external" pds
+        public static List<double> NRAMechGroundSim(int simCount = 10000)
         {
             // 1 NRA Mech
             // vs
@@ -357,10 +396,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> NRAMechSpaceSim(int simCount = 1000)
+        public static List<double> NRAMechSpaceSim(int simCount = 10000)
         {
             // 1 NRA Mech
             // vs
@@ -376,10 +415,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> PlanetaryShieldPDSSim(int simCount = 1000)
+        public static List<double> PlanetaryShieldPDSSim(int simCount = 10000)
         {
             // 2 infantry + 5 dreads
             // vs
@@ -397,10 +436,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> RiskDirectHitsSim(int simCount = 1000)
+        public static List<double> RiskDirectHitsSim(int simCount = 10000)
         {
             // 3 upgraded dreads + 3 fighters, risking direct hit
             //      vs
@@ -419,10 +458,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> SpaceCannonDefenseSim(int simCount = 1000)
+        public static List<double> SpaceCannonDefenseSim(int simCount = 10000)
         {
             // 2 infantry 
             // vs
@@ -439,10 +478,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> SpaceCannonOffenseSim(int simCount = 1000)
+        public static List<double> SpaceCannonOffenseSim(int simCount = 10000)
         {
             // 2 cruiser + 2 fighters + 1pds
             // vs
@@ -462,10 +501,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> SpaceCannonOffenseThirdPartySim(int simCount = 1000)
+        public static List<double> SpaceCannonOffenseThirdPartySim(int simCount = 10000)
         {
             // 2 dread + 2 fighters + 1pds
             // vs
@@ -492,17 +531,16 @@ namespace TI4BattleSim
 
             List<Player> othersModel = new List<Player>() { thirdPartyModel };
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, othersModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, othersModel, theater: Theater.Space);
         }
 
-        public static List<double> TitansCruiserSim(int simCount = 1000)
+        public static List<double> TitansCruiserSim(int simCount = 10000)
         {
-            // 3 upgraded titan cruisers + 3 fighters w/o Titans Agent
+            // 3 upgraded titan cruisers w/o Titans Agent
             // vs
             // 3 generic cruisers + 3 fighters
             Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
             attackerCounts.Add(UnitType.Cruiser, 3);
-            attackerCounts.Add(UnitType.Fighter, 3);
             List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
             TechModel techModel = new TechModel();
             techModel.upgrades.Add(UnitType.Cruiser);
@@ -514,10 +552,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> UpgradedSpaceCannonDefenseSim(int simCount = 1000)
+        public static List<double> UpgradedSpaceCannonDefenseSim(int simCount = 10000)
         {
             // 2 infantry 
             // vs
@@ -535,10 +573,10 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None, techModel);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
         }
 
-        public static List<double> UpgradedSpaceCannonOffenseSim(int simCount = 1000)
+        public static List<double> UpgradedSpaceCannonOffenseSim(int simCount = 10000)
         {
             // 2 cruiser + 2 fighters
             // vs
@@ -558,10 +596,10 @@ namespace TI4BattleSim
             techModel.upgrades.Add(UnitType.PDS);
             Player defenderModel = new Player(defenderUnits, Faction.None, techModel);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
 
-        public static List<double> WarSunBreaksPlanetaryShieldSim(int simCount = 1000)
+        public static List<double> WarSunBreaksPlanetaryShieldSim(int simCount = 10000)
         {
             // 1 war sun + 1 dreadnought + 2 infantry
             // vs
@@ -580,7 +618,54 @@ namespace TI4BattleSim
             List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
             Player defenderModel = new Player(defenderUnits, Faction.None);
 
-            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground, random: new Random(0));
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Ground);
+        }
+
+        public static List<double> XxchaMechsScenario(int simCount = 10000, Theater thet = Theater.Space)
+        {
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Carrier, 1);
+            attackerCounts.Add(UnitType.Mech, 1);
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            Player attackerModel = new Player(attackerUnits, Faction.None);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Mech, 1);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            Player defenderModel = new Player(defenderUnits, Faction.Xxcha);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater:thet);
+        }
+
+        public static List<double> VeldyrDreadSim(int simCount = 1000, bool veldyr = true, bool tech = true, bool upgrade = true)
+        {
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Dreadnought, 2);
+            attackerCounts.Add(UnitType.Mech, 2);
+            attackerCounts.Add(UnitType.Fighter, 2);
+            attackerCounts.Add(UnitType.Carrier, 1);
+            attackerCounts.Add(UnitType.Cruiser, 1);
+
+            TechModel atechModel = new TechModel();
+            if (tech)
+                atechModel.techs.Add(Tech.Seidr);
+            if (upgrade)
+                atechModel.upgrades.Add(UnitType.Dreadnought);
+
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            Player attackerModel = new Player(attackerUnits, veldyr ? Faction.Veldyr : Faction.None, atechModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Dreadnought, 2);
+            defenderCounts.Add(UnitType.Fighter, 2);
+            defenderCounts.Add(UnitType.Carrier, 1);
+            defenderCounts.Add(UnitType.Cruiser, 1);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            TechModel techModel = new TechModel();
+            techModel.upgrades.Add(UnitType.Destroyer);
+            Player defenderModel = new Player(defenderUnits, Faction.None, techModel);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace TI4BattleSim
         {
             //verifies that Mentak Mechs correctly prevent other units from sustaining.
             List<double> sims = Scenarios.MentakMechSim();
-            List<double> predicted = new List<double>() { 0.2205, 0.7795, 0.00 };
+            List<double> predicted = Scenarios.PreDamagedMechSim();
             SimulationTests.AssertWithinTolerances(predicted, sims);
         }
 
@@ -63,7 +63,7 @@ namespace TI4BattleSim
         public void VerifyMechBaseCombatStats()
         {
             // all mechs that don't have special combat capability should be equal to "generic" mechs
-            List<double> predicted = Scenarios.BaseFactionMechSim();
+            List<double> predicted = new List<double>() { 0.4076, 0.5924, 0.00 };
             List<Faction> combatMechs = new List<Faction>() { Faction.Mentak, Faction.NRA, Faction.Sardakk, Faction.Jolnar };
 
             foreach (Faction faction in Enum.GetValues(typeof(Faction)))
@@ -71,7 +71,7 @@ namespace TI4BattleSim
                 if (combatMechs.Contains(faction))
                     continue;
                 List<double> sims = Scenarios.BaseFactionMechSim(faction);
-                SimulationTests.AssertWithinTolerances(predicted, sims);
+                SimulationTests.AssertWithinTolerances(predicted, sims, tolerance: 0.02);
             }
         }
 

@@ -8,7 +8,7 @@ namespace TI4BattleSim
     public enum Tech
     {
         Daaxive, X89O, Antimass, Graviton, L4Disruptors, ImpulseCore, PlasmaScoring, MagenDefenseGrid, MagenOmega, Duranium,
-        AssaultCannon, NES, DimensionalSplicer, Valkyrie, Supercharge,
+        AssaultCannon, NES, DimensionalSplicer, Valkyrie, Supercharge, Seidr,
     }
     // ToDo: Implement the following
     //      X89 Omega

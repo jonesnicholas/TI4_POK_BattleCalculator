@@ -60,7 +60,7 @@ namespace TI4BattleSim
         public void UpgradedPDSSpaceCannonOffenseScenario()
         {
             //verifies that pds upgrade as expected for Space Cannon Offense
-            List<double> sims = Scenarios.UpgradedSpaceCannonDefenseSim();
+            List<double> sims = Scenarios.UpgradedSpaceCannonOffenseSim();
             List<double> predicted = new List<double>() { 0.377, 0.5564, 0.0666 };
             SimulationTests.AssertWithinTolerances(predicted, sims);
         }

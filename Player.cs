@@ -13,7 +13,9 @@ namespace TI4BattleSim
         Naalu, Nekro, Sardakk, Jolnar, Winnu, 
         Xxcha, Yin, Yssaril,
         Argent, Empyrean, Mahact, NRA, Nomad,
-        Titans, Cabal
+        Titans, Cabal,
+
+        Veldyr
     };
 
     public enum HitType
@@ -110,6 +112,27 @@ namespace TI4BattleSim
                     flagship.damage = Damage.None;
                 }
             }
+        }
+
+        public int DoEndOfCombatRound(Battle battle, Theater theater, Player other)
+        {
+            if (faction == Faction.Veldyr && theater == Theater.Space)
+            {
+                foreach (Unit flagship in units.Where(unit => unit.type == UnitType.Flagship))
+                {
+                    flagship.spaceCombat.NumDice++;
+                }
+            }
+
+            //todo: L1 Harrow when attacking
+            if (HasTech(Tech.Seidr) && theater == Theater.Space)
+            {
+                Unit highRoller = units.OrderByDescending(unit => unit.spaceCannon.ToHit).First();
+                int hMod = other.HasTech(Tech.Antimass) ? -1 : 0;
+                int hits = highRoller.spaceCannon.doCombat(battle, this, other, hitMod: hMod);
+                return hits;
+            }
+            return 0;
         }
 
         public void PrepStartOfCombat(Theater theater)

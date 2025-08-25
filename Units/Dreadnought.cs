@@ -30,6 +30,11 @@ namespace TI4BattleSim.Units
                 bombard = new CombatModule(1, upgraded ? 4 : 5);
                 spaceCombat = new CombatModule(1, upgraded ? 4 : 5);
             }
+
+            if (faction == Faction.Veldyr)
+            {
+                spaceCannon = new CombatModule(1, upgraded ? 5 : 8);
+            }
         }
     }
 }

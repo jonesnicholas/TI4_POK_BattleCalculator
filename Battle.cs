@@ -80,17 +80,11 @@ namespace TI4BattleSim
             while (winner == Winner.None)
             {
                 combatRound++;
-                StartOfCombatRound(Theater.Space);
                 SimulateCombatRound(Theater.Space, combatRound);
                 EvaluateWinner(Theater.Space);
             }
 
             return winner;
-        }
-
-        private void StartOfCombatRound(Theater theater)
-        {
-            // Nothing yet!
         }
 
         private void StartOfCombat(Theater theater)
@@ -209,6 +203,19 @@ namespace TI4BattleSim
                 ValkyrieParticleWeave(ref attackerHits, ref defenderHits);
             }
 
+            PerformHitAssignment(attackerHits, defenderHits, theater);
+
+            attacker.DuraniumArmor(theater);
+            defender.DuraniumArmor(theater);
+
+            int abhits = attacker.DoEndOfCombatRound(this, theater, defender);
+            int dbhits = defender.DoEndOfCombatRound(this, theater, attacker);
+
+            PerformHitAssignment(abhits, dbhits, theater);
+        }
+
+        public void PerformHitAssignment(int attackerHits, int defenderHits, Theater theater)
+        {
             while (attackerHits > 0 || defenderHits > 0)
             {
                 int aBonusHits = 0;
@@ -265,9 +272,6 @@ namespace TI4BattleSim
                 defender.AssignHits(this, ref attackerHits, attacker, theater);
                 break;
             }
-
-            attacker.DuraniumArmor(theater);
-            defender.DuraniumArmor(theater);
         }
 
         private void ValkyrieParticleWeave(ref int attackerHits, ref int defenderHits)

@@ -8,7 +8,18 @@ namespace TI4BattleSim
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            Scenarios.RiskDirectHitsSim(100000);
+            List<double> test;
+            /*
+            Scenarios.VeldyrDreadSim(100000, veldyr: false, tech: false, upgrade: false);
+            Scenarios.VeldyrDreadSim(100000, veldyr: false, tech: false, upgrade: true);
+            Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: false, upgrade: false);
+            Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: true, upgrade: false);
+            Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: false, upgrade: true);
+            Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: true, upgrade: true);
+            */
+            Scenarios.ArgentFlightDestroyerSim(1000000);
+
+            Console.WriteLine("Done");
         }
     }
 }

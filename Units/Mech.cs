@@ -21,6 +21,10 @@ namespace TI4BattleSim.Units
                 groundCombat = new CombatModule(2, 6, sustain: true);
                 spaceCombat = new CombatModule(2, 8, sustain: false);
             }
+            if (faction == Faction.Xxcha)
+            {
+                spaceCannon = new CombatModule(1, 8);
+            }
 
             // Todo:
             //      Barony Deploy limit

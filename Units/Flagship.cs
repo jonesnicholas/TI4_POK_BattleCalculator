@@ -116,6 +116,7 @@ namespace TI4BattleSim.Units
                 case Faction.Titans:
                 case Faction.Winnu:
                 case Faction.Xxcha:
+                case Faction.Veldyr:
                     return 7;
                 case Faction.Naalu:
                 case Faction.NRA:
@@ -151,6 +152,7 @@ namespace TI4BattleSim.Units
                 case Faction.Xxcha:
                 case Faction.Yin:
                 case Faction.Yssaril:
+                case Faction.Veldyr:
                 case Faction.None:
                     return 3;
                 case Faction.NRA:
@@ -199,6 +201,7 @@ namespace TI4BattleSim.Units
                 case Faction.Nomad:
                 case Faction.Titans:
                 case Faction.Cabal:
+                case Faction.Veldyr:
                 case Faction.None:
                     return CombatModule.NullModule();
                 default:
@@ -239,6 +242,7 @@ namespace TI4BattleSim.Units
                 case Faction.Xxcha:
                 case Faction.Yin:
                 case Faction.Yssaril:
+                case Faction.Veldyr:
                 case Faction.None:
                     return CombatModule.NullModule();
                 default:
@@ -276,6 +280,7 @@ namespace TI4BattleSim.Units
                 case Faction.NRA:
                 case Faction.Nomad:
                 case Faction.Titans:
+                case Faction.Veldyr:
                 case Faction.None:
                     return CombatModule.NullModule();
                 default:

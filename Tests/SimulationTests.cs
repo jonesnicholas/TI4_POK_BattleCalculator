@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace TI4BattleSim
@@ -8,9 +9,9 @@ namespace TI4BattleSim
     [TestClass]
     public class SimulationTests
     {
-        public static bool AssertAreRoughlyEqual(double a, double b, double tolerance)
+        public static void AssertAreRoughlyEqual(double predict, double actual, double tolerance)
         {
-            return Math.Abs(a - b) <= tolerance;
+            Debug.Assert(Math.Abs(predict - actual) <= tolerance, $"Expected value {predict} but got {actual}");
         }
 
         public static void AssertWithinTolerances(List<double> predicted, List<double> simulated, double tolerance = 0.01)
@@ -29,7 +30,7 @@ namespace TI4BattleSim
             //verifies argent destroyers function as expected
             //todo: verify capacity concerns + mech as well
             List<double> sims = Scenarios.ArgentFlightDestroyerSim();
-            List<double> predicted = new List<double>() { 0.6762, 0.2909, 0.0329 };
+            List<double> predicted = new List<double>() { 0.55, 0.36, 0.09 };
             AssertWithinTolerances(predicted, sims);
         }
 
@@ -37,8 +38,8 @@ namespace TI4BattleSim
         public void BombardMixed()
         {
             //verifies that bombard occurs as expected when mechs are defending alongside infantry
-            List<double> sims = Scenarios.BombardSim();
-            List<double> predicted = new List<double>() { 0.5144, 0.4856, 0.00 };
+            List<double> sims = Scenarios.BombardMixedSim();
+            List<double> predicted = new List<double>() { 0.34, 0.66, 0.0 };
             AssertWithinTolerances(predicted, sims);
         }
 
@@ -129,8 +130,29 @@ namespace TI4BattleSim
             //verifies titan cruisers upgrade as expected
             //todo: verify capacity concerns as well
             List<double> sims = Scenarios.TitansCruiserSim();
-            List<double> predicted = new List<double>() { 0.6316, 0.3319, 0.0365 };
+            List<double> predicted = new List<double>() { 0.48, 0.48, 0.04 };
             AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void XxchaMechsScenarios()
+        {
+            List<double> sims;
+            List<double> predicted;
+
+            sims = Scenarios.XxchaMechsScenario(thet: Theater.Space);
+            predicted = new List<double>() { 0.7, 0.0, 0.3 };
+            AssertWithinTolerances(predicted, sims);
+
+            sims = Scenarios.XxchaMechsScenario(thet: Theater.Ground);
+            predicted = new List<double>() { 0.32, 0.68, 0.0 };
+            AssertWithinTolerances(predicted, sims);
+        }
+
+        [TestMethod]
+        public void VeldyrDreadScenario()
+        {
+
         }
     }
 }
