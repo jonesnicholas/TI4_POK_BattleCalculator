@@ -42,5 +42,50 @@ namespace TI4BattleSim
             Console.WriteLine($"A:{Math.Round(awinrate, 4)} D:{Math.Round(dwinrate, 4)} N:{Math.Round(drawrate, 4)}");
             return new List<double>() { awinrate, dwinrate, drawrate };
         }
+
+        public static List<double> GetCombatHitMatrix(string state, Player AttackerModel, Player DefenderModel)
+        {
+            string aUnits = state.Split(":")[0];
+            string dUnits = state.Split(":")[1];
+
+            List<double> aHits = new List<double>() { 0 };
+            List<double> dHits = new List<double>() { 0 };
+
+            foreach(char c in aUnits)
+            {
+
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public static List<double> Convolute(List<double> initial, List<double> convolution)
+        {
+            Dictionary<int, double> resultRaw = new Dictionary<int, double>();
+
+            for (int i = 0; i < initial.Count; i ++)
+            {
+                for (int j = 0; j < convolution.Count; j ++)
+                {
+                    int count = i + j;
+                    double prob = initial[i] * convolution[j];
+                    if (!resultRaw.ContainsKey(count))
+                        resultRaw[count] = 0.0;
+
+                    resultRaw[count] += prob;
+                }
+            }
+
+            int max = resultRaw.Keys.Max();
+            List<double> output = new List<double>();
+            for (int i = 0; i <= max; i ++)
+            {
+                if (resultRaw.ContainsKey(i))
+                    output.Add(resultRaw[i]);
+                else
+                    output.Add(0.0);
+            }
+            return output;
+        }
     }
 }

@@ -149,5 +149,7 @@ namespace TI4BattleSim
             }
             return types;
         }
+
+        
     }
 }

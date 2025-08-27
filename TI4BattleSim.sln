@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30503.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TI4BattleSim", "TI4BattleSim.csproj", "{3ED26218-3616-423C-8D3E-EC98284A9DC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TI4BattleSim", "TI4BattleSim.csproj", "{3ED26218-3616-423C-8D3E-EC98284A9DC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiBattleAnalyzer", "..\TiBattleAnalyzer\TiBattleAnalyzer.csproj", "{EA2BCA84-E15C-40C0-8454-89D3FD7E4819}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{3ED26218-3616-423C-8D3E-EC98284A9DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ED26218-3616-423C-8D3E-EC98284A9DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ED26218-3616-423C-8D3E-EC98284A9DC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA2BCA84-E15C-40C0-8454-89D3FD7E4819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA2BCA84-E15C-40C0-8454-89D3FD7E4819}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA2BCA84-E15C-40C0-8454-89D3FD7E4819}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA2BCA84-E15C-40C0-8454-89D3FD7E4819}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
