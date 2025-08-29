@@ -125,7 +125,7 @@ namespace TI4BattleSim
             }
 
             //todo: L1 Harrow when attacking
-            if (HasTech(Tech.Seidr) && theater == Theater.Space)
+            if (HasTech(Tech.Seidr) && theater == Theater.Space && units.Any())
             {
                 Unit highRoller = units.OrderByDescending(unit => unit.spaceCannon.ToHit).First();
                 int hMod = other.HasTech(Tech.Antimass) ? -1 : 0;

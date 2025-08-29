@@ -14,7 +14,7 @@ namespace TI4BattleSim
             //Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: false, upgrade: false);
             //Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: true, upgrade: false);
             //Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: false, upgrade: true);
-            Scenarios.VeldyrDreadSim(100000, veldyr: true, tech: true, upgrade: true);
+            Scenarios.VeldyrDefSim(100000, veldyr: true, tech: true, upgrade: false);
 
             //Scenarios.ArgentFlightDestroyerSim(1000000);
 

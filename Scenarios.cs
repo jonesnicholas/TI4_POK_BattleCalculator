@@ -667,5 +667,32 @@ namespace TI4BattleSim
 
             return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
         }
+
+        public static List<double> VeldyrDefSim(int simCount = 1000, bool veldyr = true, bool tech = true, bool upgrade = false)
+        {
+            Dictionary<UnitType, int> attackerCounts = new Dictionary<UnitType, int>();
+            attackerCounts.Add(UnitType.Dreadnought, 1);
+            attackerCounts.Add(UnitType.Destroyer, 3);
+
+            TechModel atechModel = new TechModel();
+            if (tech)
+                atechModel.techs.Add(Tech.Seidr);
+            if (upgrade)
+                atechModel.upgrades.Add(UnitType.Dreadnought);
+
+            List<Unit> attackerUnits = Unit.CreateGenericUnitList(attackerCounts);
+            Player attackerModel = new Player(attackerUnits, veldyr ? Faction.Veldyr : Faction.None, atechModel);
+
+            Dictionary<UnitType, int> defenderCounts = new Dictionary<UnitType, int>();
+            defenderCounts.Add(UnitType.Fighter, 2);
+            defenderCounts.Add(UnitType.Carrier, 1);
+            defenderCounts.Add(UnitType.Cruiser, 3);
+            List<Unit> defenderUnits = Unit.CreateGenericUnitList(defenderCounts);
+            TechModel techModel = new TechModel();
+            techModel.upgrades.Add(UnitType.Cruiser);
+            Player defenderModel = new Player(defenderUnits, Faction.None, techModel);
+
+            return Arena.runCrucible(simCount, attackerModel, defenderModel, theater: Theater.Space);
+        }
     }
 }
